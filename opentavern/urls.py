@@ -3,7 +3,7 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
-from opentavern import views
+from tavern import views
 
 admin.autodiscover()
 
