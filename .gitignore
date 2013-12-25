@@ -7,4 +7,5 @@
 .project
 *.tmp*~
 *CACHE*
+db.sqlite3
 media/
