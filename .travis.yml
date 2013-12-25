@@ -7,6 +7,9 @@ install:
     - pip install -r requirements.txt
     - pip install coverage coveralls
 
+before_script:
+  - ./lint.sh
+
 script:  coverage run manage.py test
 
 after_success: coveralls
