@@ -6,4 +6,4 @@ python:
 install:
     - pip install -r requirements.txt
 
-script:  python opentavern/manage.py test
+script:  python manage.py test
