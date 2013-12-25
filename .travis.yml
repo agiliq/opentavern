@@ -4,8 +4,8 @@ python:
   - 2.7
 
 install:
-    - pip install -r --use-mirrors requirements/dev.txt
-    - pip install -r --use-mirrors requirements/project.txt
+    - pip install --use-mirrors -r requirements/dev.txt
+    - pip install --use-mirrors -r requirements/project.txt
     - pip install coverage coveralls
 
 before_script:
