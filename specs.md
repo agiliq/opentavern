@@ -1,10 +1,14 @@
 As an anonymous user
+---------------------
+
     - I should be able to view the homepage
          - The homepage should list all groups
          - The homepage should list upcoming events
 
 
 As an logged in user
+---------------------
+
     - I should be able to view the homepage
         - Homepage should show all the groups I have joined
         - Homepage should show events I have rsvped at the top
@@ -24,7 +28,10 @@ As an logged in user
         - Page should allow me to remove RSVP
 
 As an organizer
+---------------------
+
     - I should be able to create new events
     - I should be able to create new groups
     - Edit events
     - Edit group details
+
