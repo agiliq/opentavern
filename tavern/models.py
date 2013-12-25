@@ -12,6 +12,8 @@ class Group(models.Model):
     country = models.CharField(max_length=20)
     city = models.CharField(max_length=20)
 
+    creator = models.ForeignKey(User, related_name="created_groups")
+
     organizers = models.ManyToManyField(User)
 
     def __unicode__(self):
@@ -36,7 +38,3 @@ class Attendee(models.Model):
     user = models.ForeignKey(User)
     user = models.ForeignKey(Event)
     rsvped_on = models.DateTimeField()
-
-
-
-
