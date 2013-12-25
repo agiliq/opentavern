@@ -2,6 +2,7 @@ OpenTavern
 ------------
 
 [![Build Status](https://travis-ci.org/agiliq/opentavern.png?branch=develop)](https://travis-ci.org/agiliq/opentavern)
+[![Coverage Status](https://coveralls.io/repos/agiliq/opentavern/badge.png?branch=coverage)](https://coveralls.io/r/agiliq/opentavern?branch=coverage)
 
 OpenTavern is a self hosted meetup group organizer.
 
