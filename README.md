@@ -1,6 +1,8 @@
 OpenTavern
 ------------
 
+[![Build Status](https://travis-ci.org/agiliq/opentavern.png?branch=develop)](https://travis-ci.org/agiliq/opentavern)
+
 OpenTavern is a self hosted meetup group organizer.
 
 It allows you to create local communities around shared interest groups.
