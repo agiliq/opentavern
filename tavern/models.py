@@ -14,6 +14,7 @@ class Group(models.Model):
 
     creator = models.ForeignKey(User, related_name="created_groups")
 
+    # members = models.ManyToManyField(User, related_name="groups_users")
     organizers = models.ManyToManyField(User)
 
     def __unicode__(self):
