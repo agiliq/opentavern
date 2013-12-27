@@ -9,3 +9,4 @@
 *CACHE*
 db.sqlite3
 media/
+static_files/
