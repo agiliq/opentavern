@@ -93,7 +93,7 @@ STATIC_ROOT = SITE_PATH+'/static_files/'
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
-    os.path.join(os.path.dirname(__file__), 'static_files'),
+    os.path.join(os.path.dirname(__file__), 'static'),
 )
 
 LOGIN_REDIRECT_URL = '/'
