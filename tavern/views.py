@@ -20,7 +20,7 @@ def index(request, template='home.html'):
     """ index page """
     if request.user.is_authenticated():
         groups = request.user.tavern_groups.all()
-        groups = []
+        # groups = []
     else:
         groups = TavernGroup.objects.all()
     upcoming_events = Event.objects.filter(starts_at__gt=today)
