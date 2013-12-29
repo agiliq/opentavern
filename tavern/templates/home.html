@@ -1,5 +1,12 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    {{ form.as_p }}
+    <ul>
+    {% for group in groups %}
+        <li><a href="/groups/{{ group.id }}">{{ group.name }}</a></li>
+    {% endfor %}
+    </ul>
+
+    {% include 'upcoming_events.html' %}
+    {% include 'past_events.html' %}
 {% endblock content %}

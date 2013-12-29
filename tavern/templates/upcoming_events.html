@@ -1,0 +1,8 @@
+<div class="upcoming_events" style="padding-top: 60px;">
+    <h1> Upcoming Events</h1>
+    <ul>
+    {% for event in upcoming_events %}
+        <li><a href="/events/{{ event.id }}">{{ event.name }}</a></li>
+    {% endfor %}
+    </ul>
+</div>

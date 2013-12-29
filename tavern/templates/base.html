@@ -5,23 +5,39 @@
     <!-- Bootstrap -->
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}bootstrap/css/bootstrap.css">
      <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css">
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap.js"></script>
   </head>
   <body>
-       <div class="navbar navbar-inverse navbar-fixed-top">
-        <div class="navbar-inner">
-          <div class="container">
-              <div class="navbar-header">
-                <a class="navbar-brand" href="#">Open Tavern</a>
-              </div>
-              <div class="nav navbar-nav navbar-right">
-                <li><a href="#"> welcome: {% firstof user.first_name user.username%}</a></li>
-                <li><a href="#" title="logout"> Logout</a></li>
-                <li><a href="#" title="ChangePassword"> ChangePassword</a></li>
-              </div>
+    <div class="container">
+      <div class="header">
+        <div class="navbar navbar-inverse navbar-fixed-top">
+          <div class="navbar-inner">
+            <div class="container">
+                <div class="navbar-header">
+                  <a class="navbar-brand" href="/">Open Tavern</a>
+                </div>
+                <div class="nav navbar-nav navbar-right">
+
+                {% if user.is_authenticated %}
+                  <li><a href="#"> welcome: {% firstof user.first_name user.username%}</a></li>
+                  <li><a href="/accounts/logout?next=/" title="logout"> Logout</a></li>
+                  <li><a href="#" title="ChangePassword"> ChangePassword</a></li>
+                {% else %}
+                  <form action="/accounts/login/" method="POST">
+                      {% csrf_token %}
+                      <input type="text" name="username" id="id_username" placeholder="Username">
+                      <input type="password" name="password" id="id_password" placeholder="Password">
+                      <input type="submit" value="Submit">
+                  </form>
+                {% endif %}
+
+                </div>
+            </div>
           </div>
         </div>
       </div>
-    <script src="https://code.jquery.com/jquery.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap.js"></script>
+      <div style="padding-top: 66px;">{% block content %}{% endblock %}</div>
+    </div>
   </body>
 </html>
