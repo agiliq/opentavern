@@ -6,6 +6,7 @@ from datetime import date, timedelta
 from .models import TavernGroup, Member, Event, Attendee
 
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 
 
@@ -43,7 +44,7 @@ def group_details(request, group_id):
     try:
         group = TavernGroup.objects.get(id=group_id)
         context.update({'group': group})
-    except:
+    except ObjectDoesNotExist:
         return render(request, '404.html', context)
 
     return render(request, template, context)
@@ -60,7 +61,7 @@ def event_details(request, event_id):
     try:
         event = Event.objects.get(id=event_id)
         context.update({'event': event})
-    except:
+    except ObjectDoesNotExist:
         return render(request, '404.html', context)
 
     return render(request, template, context)
