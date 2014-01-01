@@ -4,6 +4,8 @@ import json
 from datetime import date, timedelta
 
 from .models import TavernGroup, Member, Event, Attendee
+from .forms import CreateGroupForm
+
 
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
@@ -20,8 +22,10 @@ last_week = [seven_days_before_today, today]
 def index(request, template='home.html'):
     """ index page """
     if request.user.is_authenticated():
+        # import ipdb; ipdb.set_trace()
         groups = request.user.taverngroup_set.all()
         upcoming_events = Event.objects.filter(starts_at__gt=today)
+        # import ipdb; ipdb.set_trace()
         events_rsvped = Attendee.objects.filter(user_id=request.user.id)
 
         context = {'groups': groups,
@@ -88,3 +92,10 @@ def rsvp(request,  event_id, rsvp_status):
 
     response = {'message': message}
     return json.dumps(response)
+
+
+def create_group(request, template='create_group.html'):
+    """ index page """
+    form = CreateGroupForm()
+    context = {'form': form}
+    return render(request, template, context)
