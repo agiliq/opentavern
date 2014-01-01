@@ -12,7 +12,8 @@ urlpatterns = patterns('',
                        url(r'^$', views.index, name='index'),
                        url(r'^accounts/', include("django.contrib.auth.urls")),
                        url(r'^groups/(?P<group_id>\d+)', views.group_details, name='group_details'),
-                       url(r'^events/(?P<event_id>\d+)', views.event_details, name='event_details')
+                       url(r'^events/(?P<event_id>\d+)', views.event_details, name='event_details'),
+                       url(r'^create_group/', views.create_group, name='create_group')
                        )
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
