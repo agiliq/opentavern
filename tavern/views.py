@@ -20,12 +20,16 @@ last_week = [seven_days_before_today, today]
 def index(request, template='home.html'):
     """ index page """
     if request.user.is_authenticated():
-        groups = request.user.tavern_groups.all()
-        # groups = []
+        groups = request.user.taverngroup_set.all()
+        upcoming_events = Event.objects.filter(starts_at__gt=today)
+        events_rsvped = Attendee.objects.filter(user_id=request.user.id)
+
+        context = {'groups': groups,
+                   'upcoming_events': upcoming_events,
+                   'events_rsvped': events_rsvped}
     else:
         groups = TavernGroup.objects.all()
-    upcoming_events = Event.objects.filter(starts_at__gt=today)
-    context = {'groups': groups, 'upcoming_events': upcoming_events}
+        context = {'groups': groups}
     return render(request, template, context)
 
 
@@ -34,8 +38,7 @@ def group_details(request, group_id):
     template = "group_details.html"
     upcoming_events = Event.objects.filter(starts_at__gt=today)
     past_events = Event.objects.filter(starts_at__lt=today)
-    recent_group_members = Member.objects.filter(tavern_group__id=group_id,
-                                                 join_date__range=last_week)
+    recent_group_members = Member.objects.all().order_by('-join_date')[:5]
 
     context = {"upcoming_events": upcoming_events,
                "past_events": past_events,
