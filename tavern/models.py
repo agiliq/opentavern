@@ -30,7 +30,7 @@ class Member(models.Model):
     join_date = models.DateTimeField()
 
     def __unicode__(self):
-        return "%s - %s" % (self.user.first_name, self.tavern_group.name)
+        return "%s - %s" % (self.user.username, self.tavern_group.name)
 
 
 class Event(models.Model):
@@ -55,6 +55,7 @@ RSVP_CHOICES = (('yes', 'Yes'), ('no', 'No'), ('maybe', 'May Be'))
 class Attendee(models.Model):
     "People who have RSVPed to events"
     user = models.ForeignKey(User)
+    member = models.ForeignKey(Member)
     event = models.ForeignKey(Event)
     rsvped_on = models.DateTimeField()
     rsvp_status = models.CharField(verbose_name="RSVP Status",
