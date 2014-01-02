@@ -2,6 +2,16 @@
 
 {% block content %}
     <h1> Event Name: {{ event.name }} </h1>
+    {{ event.description}}
+    <h3> Event starts on </h3>
+    {{ event.starts_at }}
+    <h3>Event created by: {{ event.creator }} </h3>
 
-    {% include 'upcoming_events.html' %}
+    <h1> Event Attendees </h1>
+    <ol>
+        {%for attendee in event_attendees%}
+            <li>{{ attendee.user.first_name }}</li>
+        {% endfor %}
+    </ol>
+    <h3><a href="/{{ event.id }}/tavern_event_update">Edit Event</a></h3>
 {% endblock content %}

@@ -1,12 +1,35 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <ul>
+
+  {% if user.is_authenticated %}
+    <h1> Joined Groups </h1>
     {% for group in groups %}
         <li><a href="/groups/{{ group.id }}">{{ group.name }}</a></li>
     {% endfor %}
-    </ul>
 
-    {% include 'upcoming_events.html' %}
     {% include 'past_events.html' %}
+
+    <h1> Events I rsvped </h1>
+    {% for event in events_rsvped %}
+        <li>{{ event }}</li>
+    {% endfor %}
+
+    <h3><a href="create_event"> Create Event </a></h3>
+
+
+    {% else %}
+        {% if groups %}
+        <ul>
+            <h1>All Groups </h1>
+            {% for group in groups %}
+                <li>{{ group.name }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+    {% endif %}
+
+  {% include 'upcoming_events.html' %}
+
 {% endblock content %}

@@ -21,6 +21,7 @@
 
                 {% if user.is_authenticated %}
                   <li><a href="#"> welcome: {% firstof user.first_name user.username%}</a></li>
+                  <li><a href="create_group"> CreateGroup </a></li>
                   <li><a href="/accounts/logout?next=/" title="logout"> Logout</a></li>
                   <li><a href="#" title="ChangePassword"> ChangePassword</a></li>
                 {% else %}

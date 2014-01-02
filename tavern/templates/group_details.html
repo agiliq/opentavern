@@ -2,6 +2,14 @@
 
 {% block content %}
     <h1> Group Name: {{ group.name }} </h1>
+    <h1> Recently Joined: {{ user.name }} </h1>
+    <ul>
+    {% for member in recent_group_members %}
+        <li>{{ member.user }}</li>
+    {% endfor %}
+    </ul>
+    <h3><a href="/{{ group.id }}/tavern_group_update">Edit Group</a></h3>
+    {% include 'past_events.html' %}
 
     {% include 'upcoming_events.html' %}
 {% endblock content %}

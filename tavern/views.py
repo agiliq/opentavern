@@ -4,9 +4,14 @@ import json
 from datetime import date, timedelta
 
 from .models import TavernGroup, Member, Event, Attendee
+from .forms import CreateGroupForm, CreateEventForm
+
 
 from django.utils import timezone
-from django.shortcuts import render
+from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import render, redirect
+from django.views.generic.edit import UpdateView
+from django.contrib.auth.decorators import login_required
 
 
 today_object = timezone.now()
@@ -19,12 +24,18 @@ last_week = [seven_days_before_today, today]
 def index(request, template='home.html'):
     """ index page """
     if request.user.is_authenticated():
-        groups = request.user.tavern_groups.all()
-        groups = []
+        # import ipdb; ipdb.set_trace()
+        groups = request.user.taverngroup_set.all()
+        upcoming_events = Event.objects.filter(starts_at__gt=today)
+        # import ipdb; ipdb.set_trace()
+        events_rsvped = Attendee.objects.filter(user_id=request.user.id)
+
+        context = {'groups': groups,
+                   'upcoming_events': upcoming_events,
+                   'events_rsvped': events_rsvped}
     else:
         groups = TavernGroup.objects.all()
-    upcoming_events = Event.objects.filter(starts_at__gt=today)
-    context = {'groups': groups, 'upcoming_events': upcoming_events}
+        context = {'groups': groups}
     return render(request, template, context)
 
 
@@ -33,8 +44,7 @@ def group_details(request, group_id):
     template = "group_details.html"
     upcoming_events = Event.objects.filter(starts_at__gt=today)
     past_events = Event.objects.filter(starts_at__lt=today)
-    recent_group_members = Member.objects.filter(tavern_group__id=group_id,
-                                                 join_date__range=last_week)
+    recent_group_members = Member.objects.all().order_by('-join_date')[:5]
 
     context = {"upcoming_events": upcoming_events,
                "past_events": past_events,
@@ -43,7 +53,7 @@ def group_details(request, group_id):
     try:
         group = TavernGroup.objects.get(id=group_id)
         context.update({'group': group})
-    except:
+    except ObjectDoesNotExist:
         return render(request, '404.html', context)
 
     return render(request, template, context)
@@ -60,7 +70,7 @@ def event_details(request, event_id):
     try:
         event = Event.objects.get(id=event_id)
         context.update({'event': event})
-    except:
+    except ObjectDoesNotExist:
         return render(request, '404.html', context)
 
     return render(request, template, context)
@@ -84,3 +94,51 @@ def rsvp(request,  event_id, rsvp_status):
 
     response = {'message': message}
     return json.dumps(response)
+
+
+@login_required
+def create_group(request, template='create_group.html'):
+    """ index page """
+    form = CreateGroupForm()
+    if request.method == 'POST':
+        form = CreateGroupForm(request.POST)
+        if form.is_valid:
+            group = form.save(commit=False)
+            group.creator = request.user
+            group.save()
+            Member.objects.create(user=request.user,
+                                  tavern_group=group,
+                                  join_date=today_object)
+            return redirect("index")
+
+    context = {'form': form}
+    return render(request, template, context)
+
+
+class GroupUpdate(UpdateView):
+    model = TavernGroup
+    template_name = 'tavern_group_update.html'
+
+tavern_group_update = GroupUpdate.as_view()
+
+
+@login_required
+def create_event(request, template='create_event.html'):
+    form = CreateEventForm()
+    if request.method == 'POST':
+        form = CreateEventForm(request.POST)
+        if form.is_valid:
+            event = form.save(commit=False)
+            event.creator = request.user
+            event.save()
+            return redirect("group_details")
+
+    context = {'form': form}
+    return render(request, template, context)
+
+
+class EventUpdate(UpdateView):
+    model = Event
+    template_name = 'tavern_event_update.html'
+
+tavern_event_update = EventUpdate.as_view()
