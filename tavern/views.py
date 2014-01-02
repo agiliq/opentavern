@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from django.views.generic.edit import UpdateView
+from django.contrib.auth.decorators import login_required
 
 
 today_object = timezone.now()
@@ -95,6 +96,7 @@ def rsvp(request,  event_id, rsvp_status):
     return json.dumps(response)
 
 
+@login_required
 def create_group(request, template='create_group.html'):
     """ index page """
     form = CreateGroupForm()
@@ -115,20 +117,19 @@ def create_group(request, template='create_group.html'):
 
 class GroupUpdate(UpdateView):
     model = TavernGroup
-    # fields = ['name', 'group_type',
-    #           'description', 'members_name',
-    #           'country', 'city']
     template_name = 'tavern_group_update.html'
 
 tavern_group_update = GroupUpdate.as_view()
 
 
+@login_required
 def create_event(request, template='create_event.html'):
     form = CreateEventForm()
     if request.method == 'POST':
         form = CreateEventForm(request.POST)
         if form.is_valid:
-            event = form.save()
+            event = form.save(commit=False)
+            event.creator = request.user
             event.save()
             return redirect("group_details")
 
