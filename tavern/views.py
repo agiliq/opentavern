@@ -4,12 +4,13 @@ import json
 from datetime import date, timedelta
 
 from .models import TavernGroup, Member, Event, Attendee
-from .forms import CreateGroupForm
+from .forms import CreateGroupForm, CreateEventForm
 
 
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.views.generic.edit import UpdateView
 
 
 today_object = timezone.now()
@@ -97,5 +98,46 @@ def rsvp(request,  event_id, rsvp_status):
 def create_group(request, template='create_group.html'):
     """ index page """
     form = CreateGroupForm()
+    if request.method == 'POST':
+        form = CreateGroupForm(request.POST)
+        if form.is_valid:
+            group = form.save(commit=False)
+            group.creator = request.user
+            group.save()
+            Member.objects.create(user=request.user,
+                                  tavern_group=group,
+                                  join_date=today_object)
+            return redirect("index")
+
     context = {'form': form}
     return render(request, template, context)
+
+
+class GroupUpdate(UpdateView):
+    model = TavernGroup
+    # fields = ['name', 'group_type',
+    #           'description', 'members_name',
+    #           'country', 'city']
+    template_name = 'tavern_group_update.html'
+
+tavern_group_update = GroupUpdate.as_view()
+
+
+def create_event(request, template='create_event.html'):
+    form = CreateEventForm()
+    if request.method == 'POST':
+        form = CreateEventForm(request.POST)
+        if form.is_valid:
+            event = form.save()
+            event.save()
+            return redirect("group_details")
+
+    context = {'form': form}
+    return render(request, template, context)
+
+
+class EventUpdate(UpdateView):
+    model = Event
+    template_name = 'tavern_event_update.html'
+
+tavern_event_update = EventUpdate.as_view()
