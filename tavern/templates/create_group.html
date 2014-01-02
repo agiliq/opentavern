@@ -1,7 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
+{% if form.errors %}
+<p>Please fill all the fields.</p>
+{% endif %}
 
+<form action="" method="POST">
+{% csrf_token %}
     {{ form.as_p }}
-
+<input type="submit" value="save"/>
+</form>
 {% endblock content%}
