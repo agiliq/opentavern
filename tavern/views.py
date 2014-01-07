@@ -76,7 +76,7 @@ def event_details(request, event_id):
     return render(request, template, context)
 
 
-def rsvp(request,  event_id, rsvp_status):
+def rsvp(request, event_id, rsvp_status):
     """ View to set RSVP status for an event """
     attendee = Attendee.objects.get_or_create(user__id=request.user.id,
                                               event__id=event_id)
@@ -127,13 +127,13 @@ tavern_group_update = GroupUpdate.as_view()
 def create_event(request, template='create_event.html'):
     # pylint: disable=E1103
     form = CreateEventForm()
-    if request.method == 'POST':
+    if request.method == 'POST'
         form = CreateEventForm(request.POST)
         if form.is_valid:
             event = form.save(commit=False)
             event.creator = request.user
             event.save()
-            return redirect("group_details")
+            return redirect("group_details"
 
     context = {'form': form}
     return render(request, template, context)
