@@ -127,7 +127,7 @@ tavern_group_update = GroupUpdate.as_view()
 def create_event(request, template='create_event.html'):
     # pylint: disable=E1103
     form = CreateEventForm()
-    if request.method == 'POST'
+    if request.method == 'POST':
         form = CreateEventForm(request.POST)
         if form.is_valid:
             event = form.save(commit=False)
