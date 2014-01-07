@@ -1,5 +1,3 @@
-""" Opentavern Forms """
-
 from django.forms import ModelForm
 from .models import TavernGroup, Event
 
@@ -16,4 +14,3 @@ class CreateEventForm(ModelForm):
     class Meta:
         model = Event
         exclude = ['creator']
-

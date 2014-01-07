@@ -98,6 +98,7 @@ def rsvp(request,  event_id, rsvp_status):
 
 @login_required
 def create_group(request, template='create_group.html'):
+    # pylint: disable=E1103
     """ index page """
     form = CreateGroupForm()
     if request.method == 'POST':
@@ -124,6 +125,7 @@ tavern_group_update = GroupUpdate.as_view()
 
 @login_required
 def create_event(request, template='create_event.html'):
+    # pylint: disable=E1103
     form = CreateEventForm()
     if request.method == 'POST':
         form = CreateEventForm(request.POST)
