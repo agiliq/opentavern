@@ -1,7 +1,5 @@
 from django.conf.urls import patterns, include, url
-from django.conf.urls.static import static
 from django.contrib import admin
-from django.conf import settings
 
 from tavern import views
 
@@ -18,5 +16,3 @@ urlpatterns = patterns('',
                        url(r'^create_event/', views.create_event, name='create_event'),
                        url(r'^(?P<pk>\d+)/tavern_event_update', views.tavern_event_update, name='tavern_event_update'),
                        )
-
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
