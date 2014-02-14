@@ -6,11 +6,11 @@ class CreateGroupForm(ModelForm):
     """ CreateGroupForm """
     class Meta:
         model = TavernGroup
-        exclude = ['creator', 'organizers']
+        exclude = ['creator', 'organizers', 'slug']
 
 
 class CreateEventForm(ModelForm):
     """ CreateEventForm """
     class Meta:
         model = Event
-        exclude = ['creator']
+        exclude = ['creator', 'slug']

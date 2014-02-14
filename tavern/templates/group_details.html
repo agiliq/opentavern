@@ -8,7 +8,7 @@
         <li>{{ member.user }}</li>
     {% endfor %}
     </ul>
-    <h3><a href="/{{ group.id }}/tavern_group_update">Edit Group</a></h3>
+    <h3><a href="{% url 'tavern_group_update' group.slug %}">Edit Group</a></h3>
     {% include 'past_events.html' %}
 
     {% include 'upcoming_events.html' %}

@@ -40,7 +40,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     # Our
-    'tavern'
+    'tavern',
+    'south'
 )
 
 MIDDLEWARE_CLASSES = (

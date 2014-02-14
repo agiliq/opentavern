@@ -2,7 +2,7 @@
     <h1> Recently completed Events</h1>
     <ul>
     {% for event in past_events %}
-        <li><a href="/events/{{ event.id }}">{{ event.name }}</a></li>
+        <li><a href="{% url 'event_details' event.slug %}">{{ event.name }}</a></li>
     {% endfor %}
     </ul>
 </div>
