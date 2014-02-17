@@ -5,7 +5,7 @@
   {% if user.is_authenticated %}
     <h1> Joined Groups </h1>
     {% for group in groups %}
-        <li><a href="/groups/{{ group.id }}">{{ group.name }}</a></li>
+        <li><a href="{% url 'group_details' group.slug %}">{{ group.name }}</a></li>
     {% endfor %}
 
     {% include 'past_events.html' %}

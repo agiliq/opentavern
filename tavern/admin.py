@@ -2,7 +2,14 @@ from django.contrib import admin
 
 from .models import TavernGroup, Event, Attendee, Member
 
-admin.site.register(TavernGroup)
-admin.site.register(Event)
+class GroupAdmin(admin.ModelAdmin):
+    exclude = ('slug',)
+
+
+class EventAdmin(admin.ModelAdmin):
+    exclude = ('slug',)
+
+admin.site.register(TavernGroup, GroupAdmin)
+admin.site.register(Event, EventAdmin)
 admin.site.register(Attendee)
 admin.site.register(Member)

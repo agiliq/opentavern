@@ -12,6 +12,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from django.views.generic.edit import UpdateView
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 
 
 today_object = timezone.now()
@@ -39,7 +40,7 @@ def index(request, template='home.html'):
     return render(request, template, context)
 
 
-def group_details(request, group_id):
+def group_details(request, slug):
     """ Group Details Page"""
     template = "group_details.html"
     upcoming_events = Event.objects.filter(starts_at__gt=today)
@@ -51,7 +52,7 @@ def group_details(request, group_id):
                "recent_group_members": recent_group_members}
 
     try:
-        group = TavernGroup.objects.get(id=group_id)
+        group = TavernGroup.objects.get(slug=slug)
         context.update({'group': group})
     except ObjectDoesNotExist:
         return render(request, '404.html', context)
@@ -59,16 +60,16 @@ def group_details(request, group_id):
     return render(request, template, context)
 
 
-def event_details(request, event_id):
+def event_details(request, slug):
     """ Event Details View """
     template = "event_details.html"
     upcoming_events = Event.objects.filter(starts_at__gt=today)
-    event_attendees = Attendee.objects.filter(event__id=event_id,
+    event_attendees = Attendee.objects.filter(event__slug=slug,
                                               rsvp_status="yes")
     context = {"upcoming_events": upcoming_events,
                "event_attendees": event_attendees}
     try:
-        event = Event.objects.get(id=event_id)
+        event = Event.objects.get(slug=slug)
         context.update({'event': event})
     except ObjectDoesNotExist:
         return render(request, '404.html', context)
@@ -103,7 +104,7 @@ def create_group(request, template='create_group.html'):
     form = CreateGroupForm()
     if request.method == 'POST':
         form = CreateGroupForm(request.POST)
-        if form.is_valid:
+        if form.is_valid():
             group = form.save(commit=False)
             group.creator = request.user
             group.save()
@@ -118,6 +119,7 @@ def create_group(request, template='create_group.html'):
 
 class GroupUpdate(UpdateView):
     model = TavernGroup
+    form_class = CreateGroupForm
     template_name = 'tavern_group_update.html'
 
 tavern_group_update = GroupUpdate.as_view()
@@ -129,11 +131,11 @@ def create_event(request, template='create_event.html'):
     form = CreateEventForm()
     if request.method == 'POST':
         form = CreateEventForm(request.POST)
-        if form.is_valid:
+        if form.is_valid():
             event = form.save(commit=False)
             event.creator = request.user
             event.save()
-            return redirect("group_details")
+            return redirect(reverse("event_details", kwargs={'event_id': event.id}))
 
     context = {'form': form}
     return render(request, template, context)
@@ -141,6 +143,7 @@ def create_event(request, template='create_event.html'):
 
 class EventUpdate(UpdateView):
     model = Event
+    form_class = CreateEventForm
     template_name = 'tavern_event_update.html'
 
 tavern_event_update = EventUpdate.as_view()

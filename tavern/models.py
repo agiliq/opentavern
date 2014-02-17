@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.template.defaultfilters import slugify
 
 
 class TavernGroup(models.Model):
@@ -17,9 +18,17 @@ class TavernGroup(models.Model):
     city = models.CharField(max_length=20)
     creator = models.ForeignKey(User, related_name="created_groups")
     organizers = models.ManyToManyField(User)
+    slug = models.SlugField(max_length=50)
 
     def __unicode__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return u'/groups/%s' % self.slug
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super(TavernGroup, self).save(*args, **kwargs)
 
 
 class Member(models.Model):
@@ -41,11 +50,19 @@ class Event(models.Model):
     starts_at = models.DateTimeField()
     end_at = models.DateTimeField(null=True, blank=True)
     location = models.TextField(null=True, blank=True)
+    slug = models.SlugField(max_length=250)    
 
     creator = models.ForeignKey(User)
 
     def __unicode__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return u'/events/%s' % self.slug
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super(Event, self).save(*args, **kwargs)
 
 
 RSVP_CHOICES = (('yes', 'Yes'), ('no', 'No'), ('maybe', 'May Be'))
