@@ -15,4 +15,6 @@ urlpatterns = patterns('',
                        url(r'^(?P<slug>[\w-]+)/tavern_group_update', views.tavern_group_update, name='tavern_group_update'),
                        url(r'^create_event/', views.create_event, name='create_event'),
                        url(r'^(?P<slug>[\w-]+)/tavern_event_update', views.tavern_event_update, name='tavern_event_update'),
+                       url(r'^change_password', views.change_password, name='change_password'),
+                       url(r'^signup', views.signup, name='signup'),
                        )

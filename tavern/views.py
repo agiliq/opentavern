@@ -6,13 +6,13 @@ from datetime import date, timedelta
 from .models import TavernGroup, Member, Event, Attendee
 from .forms import CreateGroupForm, CreateEventForm
 
-
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from django.views.generic.edit import UpdateView
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 
 
 today_object = timezone.now()
@@ -135,7 +135,7 @@ def create_event(request, template='create_event.html'):
             event = form.save(commit=False)
             event.creator = request.user
             event.save()
-            return redirect(reverse("event_details", kwargs={'event_id': event.id}))
+            return redirect(reverse("event_details", kwargs={'slug': event.slug}))
 
     context = {'form': form}
     return render(request, template, context)
@@ -147,3 +147,32 @@ class EventUpdate(UpdateView):
     template_name = 'tavern_event_update.html'
 
 tavern_event_update = EventUpdate.as_view()
+
+
+@login_required
+def change_password(request, template='change_password.html'):
+    form = PasswordChangeForm(user=request.user)
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            form.save()
+            context = {'form': form, 'success': True}
+            return render(request, template, context)
+
+    context = {'form': form}
+    return render(request, template, context)
+
+
+def signup(request, template='signup.html'):
+    form = UserCreationForm()
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.is_active = False
+            user.save()
+            context = {'form': form, 'success': True}
+            return render(request, template, context)
+
+    context = {'form': form}
+    return render(request, template, context)

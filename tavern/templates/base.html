@@ -8,6 +8,27 @@
     <script type="text/javascript" src="{{ STATIC_URL }}jquery/jquery-1.10.2.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}eternicode-bootstrap-datepicker-b374f23/js/bootstrap-datepicker.js"></script>
+
+    <!-- Date Picker -->
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/jquery-ui.css">
+    <script src="{{ STATIC_URL }}js/jquery-1.9.1.js"></script>
+    <script src="{{ STATIC_URL }}js/jquery-ui.js"></script>
+
+     <script>
+        $(function() {
+		$( "#id_starts_at" ).datepicker({'minDate': 0});
+		$( "#id_end_at" ).datepicker({'minDate': 0});
+        });
+    </script>
+    <!-- Date Picker -->
+
+    <style>
+    .list-group{
+		width: 300px;
+	}
+    </style>
+
+    
   </head>
   <body>
     <div class="container">
@@ -21,16 +42,17 @@
                 <div class="nav navbar-nav navbar-right">
 
                 {% if user.is_authenticated %}
-                  <li><a href="#"> welcome: {% firstof user.first_name user.username%}</a></li>
-                  <li><a href="create_group"> CreateGroup </a></li>
+                  <li><a href="#"> Welcome: {% firstof user.first_name user.username%}</a></li>
+                  <li><a href="{% url 'create_group' %}"> CreateGroup </a></li>
                   <li><a href="/accounts/logout?next=/" title="logout"> Logout</a></li>
-                  <li><a href="#" title="ChangePassword"> ChangePassword</a></li>
+                  <li><a href="{% url 'change_password' %}" title="ChangePassword"> ChangePassword</a></li>
                 {% else %}
-                  <form action="/accounts/login/" method="POST">
+                  <li><a href="{% url 'signup' %}" title="SignUp"> SignUp</a></li>
+                  <form action="/accounts/login/" method="POST" >
                       {% csrf_token %}
                       <input type="text" name="username" id="id_username" placeholder="Username">
                       <input type="password" name="password" id="id_password" placeholder="Password">
-                      <input type="submit" value="Submit">
+                      <button type="submit" class="btn btn-default">Sign in</button>
                   </form>
                 {% endif %}
 

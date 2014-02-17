@@ -4,16 +4,25 @@
 
   {% if user.is_authenticated %}
     <h1> Joined Groups </h1>
+
+    <ul class="list-group">
     {% for group in groups %}
-        <li><a href="{% url 'group_details' group.slug %}">{{ group.name }}</a></li>
+        <li class="list-group-item"><a href="{% url 'group_details' group.slug %}">{{ group.name }}</a></li>
+        {% empty %}
+        <li class="list-group-item">No groups joined</li>
     {% endfor %}
+    </ul>
 
-    {% include 'past_events.html' %}
+    {% if past_events %}
+        {% include 'past_events.html' %}
+    {% endif %}
 
-    <h1> Events I rsvped </h1>
-    {% for event in events_rsvped %}
-        <li>{{ event }}</li>
-    {% endfor %}
+    {% if events_rsvped %}
+        <h1> Events I rsvped </h1>
+        {% for event in events_rsvped %}
+            <li>{{ event }}</li>
+        {% endfor %}
+    {% endif %}
 
     <h3><a href="create_event"> Create Event </a></h3>
 
@@ -30,6 +39,8 @@
 
     {% endif %}
 
-  {% include 'upcoming_events.html' %}
+    {% if upcoming_events %}
+        {% include 'upcoming_events.html' %}
+    {% endif %}
 
 {% endblock content %}
