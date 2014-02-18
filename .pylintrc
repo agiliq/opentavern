@@ -66,3 +66,6 @@ generated-members=DoesNotExist,MultipleObjectsReturned,objects,status_code,conte
 
 [MISCELLANEOUS]
 notes=FIXME,XXX,TODO,@@@
+
+[MASTER]
+ignore=migrations

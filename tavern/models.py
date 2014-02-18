@@ -50,7 +50,7 @@ class Event(models.Model):
     starts_at = models.DateTimeField()
     end_at = models.DateTimeField(null=True, blank=True)
     location = models.TextField(null=True, blank=True)
-    slug = models.SlugField(max_length=250)    
+    slug = models.SlugField(max_length=250)
 
     creator = models.ForeignKey(User)
 
