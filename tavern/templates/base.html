@@ -17,7 +17,7 @@
      <script>
         $(function() {
 		$( "#id_starts_at" ).datepicker({'minDate': 0});
-		$( "#id_end_at" ).datepicker({'minDate': 0});
+		$( "#id_ends_at" ).datepicker({'minDate': 0});
         });
     </script>
     <!-- Date Picker -->
@@ -47,6 +47,7 @@
                   <li><a href="/accounts/logout?next=/" title="logout"> Logout</a></li>
                   <li><a href="{% url 'change_password' %}" title="ChangePassword"> ChangePassword</a></li>
                 {% else %}
+
                   <li><a href="{% url 'signup' %}" title="SignUp"> SignUp</a></li>
                   <form action="/accounts/login/" method="POST" >
                       {% csrf_token %}
