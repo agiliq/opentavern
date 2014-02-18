@@ -1,11 +1,4 @@
 """ Opentavern Views"""
-
-import json
-from datetime import date, timedelta
-
-from .models import TavernGroup, Member, Event, Attendee
-from .forms import CreateGroupForm, CreateEventForm
-
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
@@ -15,20 +8,23 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 
 
-today_object = timezone.now()
-today = today_object.isoformat()
-seven_days_before_today = date.today() - timedelta(7)
+import json
 
-last_week = [seven_days_before_today, today]
+from .models import TavernGroup, Member, Event, Attendee
+from .forms import CreateGroupForm, CreateEventForm
+
+
+def today_date():
+    today_object = timezone.now()
+    today = today_object.isoformat()
+    return today
 
 
 def index(request, template='home.html'):
     """ index page """
     if request.user.is_authenticated():
-        # import ipdb; ipdb.set_trace()
         groups = request.user.taverngroup_set.all()
-        upcoming_events = Event.objects.filter(starts_at__gt=today)
-        # import ipdb; ipdb.set_trace()
+        upcoming_events = Event.objects.filter(starts_at__gt=today_date())
         events_rsvped = Attendee.objects.filter(user_id=request.user.id)
 
         context = {'groups': groups,
@@ -43,8 +39,8 @@ def index(request, template='home.html'):
 def group_details(request, slug):
     """ Group Details Page"""
     template = "group_details.html"
-    upcoming_events = Event.objects.filter(starts_at__gt=today)
-    past_events = Event.objects.filter(starts_at__lt=today)
+    upcoming_events = Event.objects.filter(starts_at__gt=today_date())
+    past_events = Event.objects.filter(starts_at__lt=today_date())
     recent_group_members = Member.objects.all().order_by('-join_date')[:5]
 
     context = {"upcoming_events": upcoming_events,
@@ -63,7 +59,7 @@ def group_details(request, slug):
 def event_details(request, slug):
     """ Event Details View """
     template = "event_details.html"
-    upcoming_events = Event.objects.filter(starts_at__gt=today)
+    upcoming_events = Event.objects.filter(starts_at__gt=today_date())
     event_attendees = Attendee.objects.filter(event__slug=slug,
                                               rsvp_status="yes")
     context = {"upcoming_events": upcoming_events,
@@ -110,7 +106,7 @@ def create_group(request, template='create_group.html'):
             group.save()
             Member.objects.create(user=request.user,
                                   tavern_group=group,
-                                  join_date=today_object)
+                                  join_date=today_date())
             return redirect("index")
 
     context = {'form': form}
