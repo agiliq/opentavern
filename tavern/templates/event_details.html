@@ -2,15 +2,24 @@
 
 {% block content %}
     <h1> Event Name: {{ event.name }} </h1>
+    <hr/>
     {{ event.description}}
-    <h3> Event starts on </h3>
-    {{ event.starts_at }}
-    <h3>Event created by: {{ event.creator }} </h3>
+    <hr/>
 
+    {% if event.starts_at %}
+        <h3> Event starts on </h3>
+        {{ event.starts_at }}
+        <hr/>
+    {% endif %}
+
+    <h3>Event created by: {{ event.creator }} </h3>
+    <hr/>
     <h1> Event Attendees </h1>
     <ol>
         {%for attendee in event_attendees%}
             <li>{{ attendee.user.first_name }}</li>
+            {% empty %}
+            <li style="list-style:None;">Be the first attendee.</li>
         {% endfor %}
     </ol>
     <h3><a href="{% url 'tavern_event_update' event.slug %}">Edit Event</a></h3>

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.template.defaultfilters import slugify
+
+from .slugify import unique_slugify
 
 
 class TavernGroup(models.Model):
@@ -27,7 +28,7 @@ class TavernGroup(models.Model):
         return u'/groups/%s' % self.slug
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.name)
+        unique_slugify(self, self.name)
         super(TavernGroup, self).save(*args, **kwargs)
 
 
@@ -47,8 +48,8 @@ class Event(models.Model):
 
     name = models.CharField(max_length=200)
     description = models.TextField()
-    starts_at = models.DateTimeField()
-    end_at = models.DateTimeField(null=True, blank=True)
+    starts_at = models.DateTimeField(null=True, blank=True)
+    ends_at = models.DateTimeField(null=True, blank=True)
     location = models.TextField(null=True, blank=True)
     slug = models.SlugField(max_length=250)
 
@@ -61,7 +62,7 @@ class Event(models.Model):
         return u'/events/%s' % self.slug
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.name)
+        unique_slugify(self, self.name)
         super(Event, self).save(*args, **kwargs)
 
 
