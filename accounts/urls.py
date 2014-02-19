@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 
-from user import views
+from accounts import views
 
 urlpatterns = patterns('',
                        url(r'^change_password',
