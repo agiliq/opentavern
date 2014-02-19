@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
+from django.contrib.auth import authenticate, login
 
 from tavern.forms import UserCreateForm
 
@@ -35,3 +36,26 @@ def signup(request, template='signup.html'):
 
     context = {'form': form}
     return render(request, template, context)
+
+
+def signin(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                return redirect('index')
+            else:   
+                messages.error(request, 'Your account is inactive')             
+                return redirect('index')
+        else: 
+            messages.error(request, 'Invalid login credentials')             
+            return redirect('index')
+
+
+
+
+

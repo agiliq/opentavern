@@ -49,7 +49,7 @@
                 {% else %}
 
                   <li><a href="{% url 'signup' %}" title="SignUp"> SignUp</a></li>
-                  <form action="/accounts/login/" method="POST" >
+                  <form action="{% url 'signin' %}" method="POST" >
                       {% csrf_token %}
                       <input type="text" name="username" id="id_username" placeholder="Username">
                       <input type="password" name="password" id="id_password" placeholder="Password">
