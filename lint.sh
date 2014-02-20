@@ -1,2 +1,2 @@
-pep8 --ignore E501 --exclude=migrations opentavern tavern
+pep8 --ignore E501 --exclude=migrations opentavern tavern accounts
 pylint --rcfile=.pylintrc opentavern tavern accounts --ignore=migrations,config

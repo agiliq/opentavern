@@ -53,8 +53,3 @@ def signin(request):
         else:
             messages.error(request, 'Invalid login credentials')
             return redirect('index')
-
-
-
-
-
