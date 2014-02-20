@@ -39,6 +39,7 @@ INSTALLED_APPS = (
 
     # Our
     'tavern',
+    'accounts',
     'south'
 )
 
