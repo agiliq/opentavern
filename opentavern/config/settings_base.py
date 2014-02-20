@@ -1,16 +1,11 @@
 """
 Django settings for opentavern project.
 
-For more information on this file, see
-https://docs.djangoproject.com/en/1.6/topics/settings/
-
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 
 from unipath import Path
 
-SITE_PATH = Path(__file__).ancestor(2)
+SITE_PATH = Path(__file__).ancestor(3)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/

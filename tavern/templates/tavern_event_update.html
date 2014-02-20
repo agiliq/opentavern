@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 
+{% block title %} Edit event - {{ form.name.value }} {% endblock title %}
+
 {% block content %}
 
 <form action="" method="post">{% csrf_token %}
 
     <fieldset>  
-          <legend>Create Event</legend>  
+          <legend>Edit Event</legend>  
 
 	  {% if form.errors %}
  		<p>Please fill all the fields.</p>

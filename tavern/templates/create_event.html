@@ -1,6 +1,21 @@
 {% extends "base.html" %}
 
+{% block title %} Create Event {% endblock title %}
+
 {% block content %}
+
+<!-- Date Picker -->
+<link rel="stylesheet" href="{{ STATIC_URL }}css/jquery-ui.css">
+<script src="{{ STATIC_URL }}js/jquery-ui.js"></script>
+
+<script>
+$(function() {
+	$( "#id_starts_at" ).datepicker({'minDate': 0});
+	$( "#id_ends_at" ).datepicker({'minDate': 0});
+});
+</script>
+<!-- Date Picker -->
+
 <form action="" method="POST" class="form-horizontal">
 {% csrf_token %}
   

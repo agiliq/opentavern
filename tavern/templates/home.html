@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% block title %} {% if user.is_authenticated %} Open Tavern {% else %} Welcome to Open Tavern - SignIn {% endif %} {% endblock title %}
+
 {% block content %}
 
   {% if messages %}
