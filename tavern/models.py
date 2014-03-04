@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 
 from .slugify import unique_slugify
 
+from django.core.urlresolvers import reverse
 
 class TavernGroup(models.Model):
     "Similar interests group, create events for these"
@@ -25,7 +26,7 @@ class TavernGroup(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return u'/groups/%s' % self.slug
+        return reverse("tavern_group_details", slug=self.slug)
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
