@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 
+{% block javascript %}
+    <script type="text/javascript" src="{{ STATIC_URL }}eternicode-bootstrap-datepicker-b374f23/js/bootstrap-datepicker.js"></script>
+{% endblock %}
 {% block content %}
 <form action="" method="POST" class="form-horizontal">
 {% csrf_token %}
@@ -39,4 +42,15 @@
     </fieldset>
   
 </form>
+	  <!-- Date Picker -->
+			<link rel="stylesheet" href="{{ STATIC_URL }}css/jquery-ui.css">
+			<script src="{{ STATIC_URL }}js/jquery-ui.js"></script>
+	  
+			<script>
+				  $(function() {
+				  $( "#id_starts_at" ).datepicker({'minDate': 0});
+				  $( "#id_ends_at" ).datepicker({'minDate': 0});
+				  });
+			</script>
+	  <!-- Date Picker -->
 {% endblock content%}
