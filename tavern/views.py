@@ -105,7 +105,7 @@ def create_group(request, template='create_group.html'):
             Member.objects.create(user=request.user,
                                   tavern_group=group,
                                   join_date=today_date())
-            return redirect("index")
+            return redirect("tavern_group_details", slug=group.slug)
 
     context = {'form': form}
     return render(request, template, context)
