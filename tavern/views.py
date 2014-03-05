@@ -21,7 +21,8 @@ def today_date():
 def index(request, template='home.html'):
     """ index page """
     if request.user.is_authenticated():
-        groups = request.user.taverngroup_set.all()
+        groups = request.user.tavern_groups.all()
+        groups = [group.tavern_group for group in groups]
         upcoming_events = Event.objects.filter(starts_at__gt=today_date())
         events_rsvped = Attendee.objects.filter(user_id=request.user.id)
 
