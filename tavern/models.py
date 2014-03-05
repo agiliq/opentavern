@@ -5,6 +5,7 @@ from .slugify import unique_slugify
 
 from django.core.urlresolvers import reverse
 
+
 class TavernGroup(models.Model):
     "Similar interests group, create events for these"
     name = models.CharField(max_length=40)
