@@ -39,8 +39,7 @@ def group_details(request, slug):
     template = "group_details.html"
     upcoming_events = Event.objects.filter(starts_at__gt=today_date())
     past_events = Event.objects.filter(starts_at__lt=today_date())
-    context = {'upcoming_events': upcoming_events,
-                   'past_events': past_events}
+    context = {'upcoming_events': upcoming_events, 'past_events': past_events}
     try:
         recent_group_members = Member.objects.filter(
             tavern_group=TavernGroup.objects.get(slug=slug)
