@@ -39,11 +39,16 @@ def group_details(request, slug):
     template = "group_details.html"
     upcoming_events = Event.objects.filter(starts_at__gt=today_date())
     past_events = Event.objects.filter(starts_at__lt=today_date())
-    recent_group_members = Member.objects.all().order_by('-join_date')[:5]
+    context = {'upcoming_events': upcoming_events,
+                   'past_events': past_events}
+    try:
+        recent_group_members = Member.objects.filter(
+            tavern_group=TavernGroup.objects.get(slug=slug)
+            ).order_by('-join_date')[:5]
+    except ObjectDoesNotExist:
+        return render(request, '404.html', context)
 
-    context = {"upcoming_events": upcoming_events,
-               "past_events": past_events,
-               "recent_group_members": recent_group_members}
+    context.update({"recent_group_members": recent_group_members})
 
     try:
         group = TavernGroup.objects.get(slug=slug)
