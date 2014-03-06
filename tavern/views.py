@@ -24,8 +24,6 @@ def index(request, template='home.html'):
     if request.user.is_authenticated():
         groups = request.user.tavern_groups.all()
         joined_groups = [group.tavern_group for group in groups]
-        import pdb
-        pdb.set_trace()
         unjoined_groups = TavernGroup.objects.filter(
             ~Q(creator=request.user),
             ~Q(organizers=request.user))
