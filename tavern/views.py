@@ -116,6 +116,12 @@ def event_details(request, slug):
     context = {"upcoming_events": upcoming_events,
                "event_attendees": event_attendees}
     try:
+        event = Event.objects.get(slug=slug, creator=request.user)
+        user_is_creator = True
+    except ObjectDoesNotExist:
+        user_is_creator = False
+    context.update({'user_is_creator': user_is_creator})
+    try:
         event = Event.objects.get(slug=slug)
         context.update({'event': event})
     except ObjectDoesNotExist:
