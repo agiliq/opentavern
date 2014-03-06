@@ -85,7 +85,7 @@ def toggle_member(request):
         user = User.objects.get(id=request.GET.get('user_id'))
         group = TavernGroup.objects.get(slug=request.GET.get('slug'))
     except ObjectDoesNotExist:
-        return render(request, '404.html', context)
+        return render(request, '404.html', {})
     try:
         member = Member.objects.get(user=user, tavern_group=group)
         response = "Join"
