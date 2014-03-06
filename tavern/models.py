@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 from .slugify import unique_slugify
 
@@ -32,6 +33,8 @@ class TavernGroup(models.Model):
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
         super(TavernGroup, self).save(*args, **kwargs)
+        Member.objects.create(user=self.creator, tavern_group=self,
+                              join_date=timezone.now().isoformat())
 
 
 class Member(models.Model):
@@ -66,6 +69,10 @@ class Event(models.Model):
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
         super(Event, self).save(*args, **kwargs)
+        member = Member.objects.get(user=self.creator, tavern_group=self.group)
+        Attendee.objects.create(user=self.creator, member=member, event=self,
+                                rsvped_on=timezone.now().isoformat(),
+                                rsvp_status='yes')
 
 
 RSVP_CHOICES = (('yes', 'Yes'), ('no', 'No'), ('maybe', 'May Be'))
