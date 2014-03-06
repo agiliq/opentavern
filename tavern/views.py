@@ -81,16 +81,19 @@ def toggle_member(request):
     Adds a member to the group if he's not in the group, or
     deletes a member if he's already a member
     """
-    user = User.objects.get(id=request.GET.get('user_id'))
-    group_details = TavernGroup.objects.get(slug=request.GET.get('slug'))
     try:
-        member = Member.objects.get(user=user, tavern_group=group_details)
+        user = User.objects.get(id=request.GET.get('user_id'))
+        group = TavernGroup.objects.get(slug=request.GET.get('slug'))
+    except ObjectDoesNotExist:
+        return render(request, '404.html', context)
+    try:
+        member = Member.objects.get(user=user, tavern_group=group)
         response = "Join"
         member.delete()
     except ObjectDoesNotExist:
         member = Member.objects.create(
             user=user,
-            tavern_group=group_details,
+            tavern_group=group,
             join_date=today_date())
         response = "Unjoin"
     return HttpResponse(response)
