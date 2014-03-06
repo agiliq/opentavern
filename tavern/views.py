@@ -57,6 +57,14 @@ def group_details(request, slug):
     except ObjectDoesNotExist:
         user_is_member = False
     context.update({'user_is_member':user_is_member})
+    
+    try:
+        tavern_group = TavernGroup.objects.get(slug=slug, creator=request.user)
+        user_is_creator = True
+    except:
+        user_is_creator = False
+    context.update({'user_is_creator': user_is_creator})
+    
     try:
         recent_group_members = Member.objects.filter(
             tavern_group=TavernGroup.objects.get(slug=slug)
