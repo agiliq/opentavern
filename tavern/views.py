@@ -30,7 +30,8 @@ def index(request, template='home.html'):
             ~Q(creator=request.user),
             ~Q(organizers=request.user))
         upcoming_events = Event.objects.filter(starts_at__gt=today_date())
-        events_rsvped = Attendee.objects.filter(user_id=request.user.id)
+        events = Attendee.objects.filter(user_id=request.user.id)
+        events_rsvped = [event.event for event in events]
 
         context = {'joined_groups': joined_groups,
                    'unjoined_groups': unjoined_groups,

@@ -34,9 +34,13 @@
 
     {% if events_rsvped %}
         <h1> Events I rsvped </h1>
-        {% for event in events_rsvped %}
-            <li>{{ event }}</li>
-        {% endfor %}
+        <ul class="list-group">
+    {% for event in events_rsvped %}
+        <li class="list-group-item"><a href="{% url 'tavern_event_details' event.slug %}">{{ event.name }}</a></li>
+        {% empty %}
+        <li class="list-group-item">No upcoming events</li>
+    {% endfor %}
+    </ul>
     {% endif %}
 
     <h3><a href="{% url 'tavern_create_event' %}"> Create Event </a></h3>
