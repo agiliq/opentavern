@@ -61,7 +61,7 @@ def group_details(request, slug):
     try:
         tavern_group = TavernGroup.objects.get(slug=slug, creator=request.user)
         user_is_creator = True
-    except:
+    except ObjectDoesNotExist:
         user_is_creator = False
     context.update({'user_is_creator': user_is_creator})
     
