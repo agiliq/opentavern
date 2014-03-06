@@ -147,9 +147,6 @@ def create_group(request, template='create_group.html'):
             group = form.save(commit=False)
             group.creator = request.user
             group.save()
-            Member.objects.create(user=request.user,
-                                  tavern_group=group,
-                                  join_date=today_date())
             return redirect("tavern_group_details", slug=group.slug)
 
     context = {'form': form}
