@@ -2,6 +2,13 @@
 
 {% block content %}
     <h1> Group Name: {{ group.name }} </h1>
+    <button id="is_member" type="button" onclick="toggle_member('{{ user.id }}', '{{ group.slug }}')">
+        {% if user_is_member %}
+            Unjoin group
+        {% else %}
+            Join group
+        {% endif %}
+    </button>
     <h1> Recently Joined: {{ user.name }} </h1>
     <ul>
     {% for member in recent_group_members %}
@@ -12,4 +19,31 @@
     {% include 'past_events.html' %}
 
     {% include 'upcoming_events.html' %}
+    
+    <script>
+        function toggle_member(user, slug) {
+            var xmlhttp;
+            if (window.XMLHttpRequest){
+                // code for IE7+, Firefox, Chrome, Opera, Safari
+                xmlhttp=new XMLHttpRequest();
+            }
+            else{
+                // code for IE6, IE5
+                xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            xmlhttp.onreadystatechange=function(){
+                if (xmlhttp.readyState==4 && xmlhttp.status==200)
+                {
+                    document.getElementById("is_member").innerHTML=xmlhttp.responseText;
+                }
+            }
+            //var uservalue = encodeURIComponent(user)
+            //var slugvalue = encodeURIComponent(slug)
+            //var parameters = "user="+uservalue+"&slug="+slugvalue
+            var url = "/toggle_member?user_id="+user+"&slug="+slug
+            xmlhttp.open("GET", url, true);
+            xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
+            xmlhttp.send();
+        }
+    </script>
 {% endblock content %}

@@ -6,6 +6,8 @@ from django.views.generic.edit import UpdateView
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.db.models import Q
+from django.http import HttpResponse
+from django.contrib.auth.models import User
 
 import json
 
@@ -45,12 +47,22 @@ def group_details(request, slug):
     template = "group_details.html"
     upcoming_events = Event.objects.filter(starts_at__gt=today_date())
     past_events = Event.objects.filter(starts_at__lt=today_date())
-    context = {'upcoming_events': upcoming_events, 'past_events': past_events}
+    context = {'user': request.user,
+               'upcoming_events': upcoming_events,
+               'past_events': past_events}
+    try:
+        Member.objects.get(tavern_group=TavernGroup.objects.get(slug=slug),
+                           user=request.user)
+        user_is_member = True
+    except ObjectDoesNotExist:
+        user_is_member = False
+    context.update({'user_is_member':user_is_member})
     try:
         recent_group_members = Member.objects.filter(
             tavern_group=TavernGroup.objects.get(slug=slug)
             ).order_by('-join_date')[:5]
     except ObjectDoesNotExist:
+        user_is_member = False
         return render(request, '404.html', context)
 
     context.update({"recent_group_members": recent_group_members})
@@ -62,6 +74,26 @@ def group_details(request, slug):
         return render(request, '404.html', context)
 
     return render(request, template, context)
+
+
+def toggle_member(request):
+    """
+    Adds a member to the group if he's not in the group, or
+    deletes a member if he's already a member
+    """
+    user = User.objects.get(id=request.GET.get('user_id'))
+    group_details = TavernGroup.objects.get(slug=request.GET.get('slug'))
+    try:
+        member = Member.objects.get(user=user, tavern_group=group_details)
+        response = "Join"
+        member.delete()
+    except ObjectDoesNotExist:
+        member = Member.objects.create(
+            user=user,
+            tavern_group=group_details,
+            join_date=today_date())
+        response = "Unjoin"
+    return HttpResponse(response)
 
 
 def event_details(request, slug):
