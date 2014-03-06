@@ -12,12 +12,21 @@
     <h1> Joined Groups </h1>
 
     <ul class="list-group">
-    {% for group in groups %}
+    {% for group in joined_groups %}
         <li class="list-group-item"><a href="{% url 'tavern_group_details' group.slug %}">{{ group.name }}</a></li>
         {% empty %}
         <li class="list-group-item">No groups joined</li>
     {% endfor %}
     </ul>
+    
+    <h1> Unjoined Groups</h1>
+        <ul class="list-group">
+            {% for group in unjoined_groups %}
+                <li class="list-group-item"><a href="{% url 'tavern_group_details' group.slug %}">{{ group.name }}</a></li>
+                {% empty %}
+                <li class="list-group-item">No groups left</li>
+            {% endfor %}
+        </ul>
 
     {% if past_events %}
         {% include 'past_events.html' %}

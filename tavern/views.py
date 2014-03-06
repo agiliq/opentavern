@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.views.generic.edit import UpdateView
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 
 import json
 
@@ -22,16 +23,22 @@ def index(request, template='home.html'):
     """ index page """
     if request.user.is_authenticated():
         groups = request.user.tavern_groups.all()
-        groups = [group.tavern_group for group in groups]
+        joined_groups = [group.tavern_group for group in groups]
+        import pdb
+        pdb.set_trace()
+        unjoined_groups = TavernGroup.objects.filter(
+            ~Q(creator=request.user),
+            ~Q(organizers=request.user))
         upcoming_events = Event.objects.filter(starts_at__gt=today_date())
         events_rsvped = Attendee.objects.filter(user_id=request.user.id)
 
-        context = {'groups': groups,
+        context = {'joined_groups': joined_groups,
+                   'unjoined_groups': unjoined_groups,
                    'upcoming_events': upcoming_events,
                    'events_rsvped': events_rsvped}
     else:
-        groups = TavernGroup.objects.all()
-        context = {'groups': groups}
+        joined_groups = TavernGroup.objects.all()
+        context = {'joined_groups': joined_groups}
     return render(request, template, context)
 
 
