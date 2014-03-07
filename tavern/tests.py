@@ -3,7 +3,22 @@ from django.contrib.auth.models import User
 
 from .models import TavernGroup, Member
 
+
 class TestModels(TestCase):
+
+    def test_tavern_group_unique_slug(self):
+        """Test that unique slugs are generated for
+        groups with same name"""
+        creator = create_and_get_user()
+        group = create_and_get_tavern_group(creator=creator)
+        self.assertEqual(group.slug, 'testgroup')
+        group2 = create_and_get_tavern_group(creator=creator)
+        self.assertEqual(group2.slug, 'testgroup-2')
+        group3 = create_and_get_tavern_group(creator=creator)
+        self.assertEqual(group3.slug, 'testgroup-3')
+        group3.delete()
+        group3 = create_and_get_tavern_group(creator=creator)
+        self.assertEqual(group3.slug, 'testgroup-3')
 
     def test_tavern_group_save(self):
         """When a TavernGroup is saved, we want to make sure
@@ -30,6 +45,7 @@ class TestIndex(TestCase):
 
 def create_and_get_user():
     return User.objects.create_user(username='test', email='test@agiliq.com', password='test')
+
 
 def create_and_get_tavern_group(creator, organizers=None):
         group = TavernGroup(name='TestGroup', description='A group for testing', creator=creator)
