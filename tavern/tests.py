@@ -32,8 +32,8 @@ def create_and_get_user():
     return User.objects.create_user(username='test', email='test@agiliq.com', password='test')
 
 def create_and_get_tavern_group(creator, organizers=None):
-        group = TavernGroup(name='TestGroup', description='A group for testing', creator=creator)
-        group.save()
-        if organizers:
-            group.organizers.add(organizers)
-        return group
+    group = TavernGroup(name='TestGroup', description='A group for testing', creator=creator)
+    group.save()
+    if organizers:
+        group.organizers.add(organizers)
+    return group
