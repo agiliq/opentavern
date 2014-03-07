@@ -48,8 +48,8 @@ def create_and_get_user():
 
 
 def create_and_get_tavern_group(creator, organizers=None):
-        group = TavernGroup(name='TestGroup', description='A group for testing', creator=creator)
-        group.save()
-        if organizers:
-            group.organizers.add(organizers)
-        return group
+    group = TavernGroup(name='TestGroup', description='A group for testing', creator=creator)
+    group.save()
+    if organizers:
+        group.organizers.add(organizers)
+    return group

@@ -74,9 +74,13 @@ class Event(models.Model):
         unique_slugify(self, self.name)
         super(Event, self).save(*args, **kwargs)
         member = Member.objects.get(user=self.creator, tavern_group=self.group)
-        Attendee.objects.create(user=self.creator, member=member, event=self,
-                                rsvped_on=timezone.now().isoformat(),
-                                rsvp_status='yes')
+        try:
+            Attendee.objects.get(user=self.creator, member=member, event=self)
+        except ObjectDoesNotExist:
+            Attendee.objects.create(user=self.creator, member=member,
+                                    event=self,
+                                    rsvped_on=timezone.now().isoformat(),
+                                    rsvp_status='yes')
 
 
 RSVP_CHOICES = (('yes', 'Yes'), ('no', 'No'), ('maybe', 'May Be'))
