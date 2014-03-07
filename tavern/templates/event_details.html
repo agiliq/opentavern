@@ -22,7 +22,7 @@
             <li style="list-style:None;">Be the first attendee.</li>
         {% endfor %}
     </ol>
-    {% if user_is_creator %}
+    {% if editable %}
     <h3><a href="{% url 'tavern_event_update' event.slug %}">Edit Event</a></h3>
     {% endif %}
 {% endblock content %}

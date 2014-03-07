@@ -118,10 +118,11 @@ def event_details(request, slug):
                "event_attendees": event_attendees}
     try:
         event = Event.objects.get(slug=slug, creator=request.user)
-        user_is_creator = True
+        # condition to test if the event has already started.
+        editable = event.starts_at > timezone.now()
     except ObjectDoesNotExist:
-        user_is_creator = False
-    context.update({'user_is_creator': user_is_creator})
+        editable = False
+    context.update({'editable': editable})
     try:
         event = Event.objects.get(slug=slug)
         context.update({'event': event})
