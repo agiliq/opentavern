@@ -5,6 +5,7 @@ from django.utils import timezone
 from .slugify import unique_slugify
 
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class TavernGroup(models.Model):
@@ -33,8 +34,11 @@ class TavernGroup(models.Model):
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
         super(TavernGroup, self).save(*args, **kwargs)
-        Member.objects.create(user=self.creator, tavern_group=self,
-                              join_date=timezone.now().isoformat())
+        try:
+            Member.objects.get(user=self.creator, tavern_group=self)
+        except ObjectDoesNotExist:
+            Member.objects.create(user=self.creator, tavern_group=self,
+                                  join_date=timezone.now().isoformat())
 
 
 class Member(models.Model):
