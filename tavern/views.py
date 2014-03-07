@@ -85,7 +85,7 @@ def group_details(request, slug):
     return render(request, template, context)
 
 
-def toggle_member(request):
+def tavern_toggle_member(request):
     """
     Adds a member to the group if he's not in the group, or
     deletes a member if he's already a member
