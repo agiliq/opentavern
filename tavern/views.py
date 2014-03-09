@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponse
 from django.contrib.auth.models import User
+from django.http import Http404
 
 import json
 
@@ -72,7 +73,7 @@ def group_details(request, slug):
                                                     ).order_by('-join_date')[:5]
     except ObjectDoesNotExist:
         user_is_member = False
-        return render(request, '404.html', context)
+        raise Http404
 
     context.update({"recent_group_members": recent_group_members})
 
@@ -80,7 +81,7 @@ def group_details(request, slug):
         group = TavernGroup.objects.get(slug=slug)
         context.update({'group': group})
     except ObjectDoesNotExist:
-        return render(request, '404.html', context)
+        raise Http404
 
     return render(request, template, context)
 
@@ -94,7 +95,7 @@ def tavern_toggle_member(request):
         user = User.objects.get(id=request.GET.get('user_id'))
         group = TavernGroup.objects.get(slug=request.GET.get('slug'))
     except ObjectDoesNotExist:
-        return render(request, '404.html', {})
+        raise Http404
     try:
         member = Member.objects.get(user=user, tavern_group=group)
         response = "Join"
@@ -127,7 +128,7 @@ def event_details(request, slug):
         event = Event.objects.get(slug=slug)
         context.update({'event': event})
     except ObjectDoesNotExist:
-        return render(request, '404.html', context)
+        raise Http404
 
     return render(request, template, context)
 
