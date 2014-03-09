@@ -5,7 +5,6 @@ from django.shortcuts import render, redirect
 from django.views.generic.edit import UpdateView
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.db.models import Q
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.http import Http404
