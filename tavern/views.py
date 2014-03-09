@@ -27,9 +27,8 @@ def index(request, template='home.html'):
     if request.user.is_authenticated():
         groups = request.user.tavern_groups.all()
         joined_groups = [group.tavern_group for group in groups]
-        unjoined_groups = TavernGroup.objects.filter(
-            ~Q(creator=request.user),
-            ~Q(organizers=request.user))
+        all_groups = TavernGroup.objects.all()
+        unjoined_groups = list(set(all_groups) - set(joined_groups))
         upcoming_events = Event.objects.filter(starts_at__gt=today_date())
         events = Attendee.objects.filter(user_id=request.user.id)
         events_rsvped = [event.event for event in events]
