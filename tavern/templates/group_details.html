@@ -22,6 +22,9 @@
 
     {% include 'upcoming_events.html' %}
     
+{% endblock content %}
+
+{% block javascript %}
     <script>
         function toggle_member(user, slug) {
             var url = "/tavern_toggle_member";
@@ -29,9 +32,8 @@
                    {user_id:user, slug:slug,
                    csrfmiddlewaretoken: '{{ csrf_token }}'},
                    function(data) {
-                    alert(data)
                     $("#is_member").html(data);
                    });
         }
     </script>
-{% endblock content %}
+{% endblock %}
