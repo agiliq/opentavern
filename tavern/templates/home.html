@@ -9,24 +9,33 @@
   {% endif %}
 
   {% if user.is_authenticated %}
-    <h1> Joined Groups </h1>
+    <div style="width:50%;float:right">
+    <h1>Groups</h1>
 
     <ul class="list-group">
     {% for group in joined_groups %}
-        <li class="list-group-item"><a href="{% url 'tavern_group_details' group.slug %}">{{ group.name }}</a></li>
+        <li class="list-group-item">
+            <a href="{% url 'tavern_group_details' group.slug %}">{{ group.name }}</a>
+            <button id="join_group" style="float: right;" onclick="toggle_member(this.id, '{{ user.id }}', '{{ group.slug }}')">
+                Unjoin Group
+            </button>
+        </li>
         {% empty %}
         <li class="list-group-item">No groups joined</li>
     {% endfor %}
-    </ul>
     
-    <h1> Unjoined Groups</h1>
-        <ul class="list-group">
-            {% for group in unjoined_groups %}
-                <li class="list-group-item"><a href="{% url 'tavern_group_details' group.slug %}">{{ group.name }}</a></li>
-                {% empty %}
-                <li class="list-group-item">No groups left</li>
-            {% endfor %}
-        </ul>
+    {% for group in unjoined_groups %}
+        <li class="list-group-item">
+            <a href="{% url 'tavern_group_details' group.slug %}">{{ group.name }}</a>
+            <button id="unjoin_group" style="float: right;" onclick="toggle_member(this.id, '{{ user.id }}', '{{ group.slug }}')">
+                Join Group
+            </button>
+        </li>
+        {% empty %}
+        <li class="list-group-item">No groups left</li>
+    {% endfor %}
+    </ul>
+    </div>
 
     {% if past_events %}
         {% include 'past_events.html' %}
@@ -63,3 +72,22 @@
     {% endif %}
 
 {% endblock content %}
+
+{% block javascript %}
+    <script>
+        function toggle_member(clicked_id, user, slug) {
+            var url = "/tavern_toggle_member";
+            $.post(url,
+                   {user_id:user, slug:slug,
+                   csrfmiddlewaretoken: '{{ csrf_token }}'},
+                   function(data) {
+                    if (clicked_id == 'join_group') {
+                        $('#join_group').html(data);
+                    }
+                    if (clicked_id == 'unjoin_group') {
+                        $('#unjoin_group').html(data);
+                    }
+                   });
+        }
+    </script>
+{% endblock %}
