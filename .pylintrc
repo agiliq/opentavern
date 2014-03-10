@@ -68,4 +68,4 @@ generated-members=DoesNotExist,MultipleObjectsReturned,objects,status_code,conte
 notes=FIXME,XXX,TODO,@@@
 
 [MASTER]
-ignore=migrations
+ignore=migrations, config
