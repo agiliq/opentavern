@@ -87,10 +87,10 @@ def tavern_toggle_member(request):
     Adds a member to the group if he's not in the group, or
     deletes a member if he's already a member
     """
-    
+
     user = get_object_or_404(User, id=request.GET.get('user_id'))
     group = get_object_or_404(TavernGroup, slug=request.GET.get('slug'))
-    
+
     try:
         member = Member.objects.get(user=user, tavern_group=group)
         response = "Join"
@@ -119,7 +119,7 @@ def event_details(request, slug):
     except ObjectDoesNotExist:
         editable = False
     context.update({'editable': editable})
-    
+
     event = get_object_or_404(Event, slug=slug)
     context.update({'event': event})
 
