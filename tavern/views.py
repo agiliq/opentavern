@@ -88,19 +88,18 @@ def tavern_toggle_member(request):
     deletes a member if he's already a member
     """
 
-    user = get_object_or_404(User, id=request.GET.get('user_id'))
-    group = get_object_or_404(TavernGroup, slug=request.GET.get('slug'))
-
+    user = get_object_or_404(User, id=request.POST.get('user_id'))
+    group = get_object_or_404(TavernGroup, slug=request.POST.get('slug'))
     try:
         member = Member.objects.get(user=user, tavern_group=group)
-        response = "Join"
+        response = "Join Group"
         member.delete()
     except ObjectDoesNotExist:
         member = Member.objects.create(
             user=user,
             tavern_group=group,
             join_date=today_date())
-        response = "Unjoin"
+        response = "Unjoin Group"
     return HttpResponse(response)
 
 

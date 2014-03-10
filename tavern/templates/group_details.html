@@ -24,28 +24,14 @@
     
     <script>
         function toggle_member(user, slug) {
-            var xmlhttp;
-            if (window.XMLHttpRequest){
-                // code for IE7+, Firefox, Chrome, Opera, Safari
-                xmlhttp=new XMLHttpRequest();
-            }
-            else{
-                // code for IE6, IE5
-                xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-            }
-            xmlhttp.onreadystatechange=function(){
-                if (xmlhttp.readyState==4 && xmlhttp.status==200)
-                {
-                    document.getElementById("is_member").innerHTML=xmlhttp.responseText;
-                }
-            }
-            //var uservalue = encodeURIComponent(user)
-            //var slugvalue = encodeURIComponent(slug)
-            //var parameters = "user="+uservalue+"&slug="+slugvalue
-            var url = "/tavern_toggle_member?user_id="+user+"&slug="+slug
-            xmlhttp.open("GET", url, true);
-            xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
-            xmlhttp.send();
+            var url = "/tavern_toggle_member";
+            $.post(url,
+                   {user_id:user, slug:slug,
+                   csrfmiddlewaretoken: '{{ csrf_token }}'},
+                   function(data) {
+                    alert(data)
+                    $("#is_member").html(data);
+                   });
         }
     </script>
 {% endblock content %}
