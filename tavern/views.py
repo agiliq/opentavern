@@ -1,6 +1,5 @@
 """ Opentavern Views"""
 from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from django.views.generic.edit import UpdateView
 from django.contrib.auth.decorators import login_required
@@ -55,14 +54,14 @@ def group_details(request, slug):
         Member.objects.get(tavern_group=TavernGroup.objects.get(slug=slug),
                            user=request.user)
         user_is_member = True
-    except ObjectDoesNotExist:
+    except Member.DoesNotExist:
         user_is_member = False
     context.update({'user_is_member': user_is_member})
 
     try:
         tavern_group = TavernGroup.objects.get(slug=slug, creator=request.user)
         user_is_creator = True
-    except ObjectDoesNotExist:
+    except TavernGroup.DoesNotExist:
         user_is_creator = False
     context.update({'user_is_creator': user_is_creator})
 
@@ -70,7 +69,7 @@ def group_details(request, slug):
         recent_group_members = Member.objects.filter(
                                 tavern_group=TavernGroup.objects.get(slug=slug)
                                                     ).order_by('-join_date')[:5]
-    except ObjectDoesNotExist:
+    except Member.DoesNotExist:
         user_is_member = False
         raise Http404
 
@@ -94,7 +93,7 @@ def tavern_toggle_member(request):
         member = Member.objects.get(user=user, tavern_group=group)
         response = "Join Group"
         member.delete()
-    except ObjectDoesNotExist:
+    except Member.DoesNotExist:
         member = Member.objects.create(
             user=user,
             tavern_group=group,
@@ -115,7 +114,7 @@ def event_details(request, slug):
         event = Event.objects.get(slug=slug, creator=request.user)
         # condition to test if the event has already started.
         editable = event.starts_at > timezone.now()
-    except ObjectDoesNotExist:
+    except Event.DoesNotExist:
         editable = False
     context.update({'editable': editable})
 
