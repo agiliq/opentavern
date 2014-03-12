@@ -27,7 +27,7 @@
 {% block javascript %}
     <script>
         function toggle_member(user, slug) {
-            var url = "/tavern_toggle_member";
+            var url = "{% url 'tavern_toggle_member' %}";
             $.post(url,
                    {user_id:user, slug:slug,
                    csrfmiddlewaretoken: '{{ csrf_token }}'},
