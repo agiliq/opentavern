@@ -14,9 +14,11 @@ class CreateGroupForm(forms.ModelForm):
 
 class CreateEventForm(forms.ModelForm):
     """ CreateEventForm """
+    event_time = forms.CharField(max_length=50, required=True)
+
     class Meta:
         model = Event
-        exclude = ['creator', 'slug']
+        exclude = ['creator', 'slug', 'starts_at', 'ends_at']
 
 
 class UserCreateForm(UserCreationForm):
