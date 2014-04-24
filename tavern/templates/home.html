@@ -16,7 +16,7 @@
     {% for group in joined_groups %}
         <li class="list-group-item">
             <a href="{% url 'tavern_group_details' group.slug %}">{{ group.name }}</a>
-            <button id="join_group" style="float: right;" onclick="toggle_member(this.id, '{{ user.id }}', '{{ group.slug }}')">
+            <button id="{{ group.slug }}" style="float: right;" onclick="toggle_member(this.id, '{{ user.id }}', '{{ group.slug }}')">
                 Unjoin Group
             </button>
         </li>
@@ -27,7 +27,7 @@
     {% for group in unjoined_groups %}
         <li class="list-group-item">
             <a href="{% url 'tavern_group_details' group.slug %}">{{ group.name }}</a>
-            <button id="unjoin_group" style="float: right;" onclick="toggle_member(this.id, '{{ user.id }}', '{{ group.slug }}')">
+            <button id="{{ group.slug }}" style="float: right;" onclick="toggle_member(this.id, '{{ user.id }}', '{{ group.slug }}')">
                 Join Group
             </button>
         </li>
@@ -81,12 +81,7 @@
                    {user_id:user, slug:slug,
                    csrfmiddlewaretoken: '{{ csrf_token }}'},
                    function(data) {
-                    if (clicked_id == 'join_group') {
-                        $('#join_group').html(data);
-                    }
-                    if (clicked_id == 'unjoin_group') {
-                        $('#unjoin_group').html(data);
-                    }
+                        $('#'+clicked_id).html(data);
                    });
         }
     </script>
