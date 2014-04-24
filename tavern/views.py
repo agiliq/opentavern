@@ -67,8 +67,8 @@ def group_details(request, slug):
 
     try:
         recent_group_members = Member.objects.filter(
-                                tavern_group=TavernGroup.objects.get(slug=slug)
-                                                    ).order_by('-join_date')[:5]
+            tavern_group=TavernGroup.objects.get(slug=slug)
+            ).order_by('-join_date')[:5]
     except Member.DoesNotExist:
         user_is_member = False
         raise Http404
