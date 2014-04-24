@@ -26,7 +26,7 @@ class TavernGroup(models.Model):
     slug = models.SlugField(max_length=50)
 
     def __unicode__(self):
-        return self.name
+        return "%s" % self.name
 
     def get_absolute_url(self):
         return reverse("tavern_group_details", args=[str(self.slug)])
@@ -65,7 +65,7 @@ class Event(models.Model):
     creator = models.ForeignKey(User)
 
     def __unicode__(self):
-        return self.name
+        return "%s" % self.name
 
     def get_absolute_url(self):
         return reverse("tavern_event_details", args=[str(self.slug)])
