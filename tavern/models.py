@@ -28,7 +28,7 @@ class TavernGroup(models.Model):
     def __unicode__(self):
         return "%s" % self.name
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, *args, **kwargs):
         return reverse("tavern_group_details", args=[str(self.slug)])
 
     def save(self, *args, **kwargs):
@@ -67,7 +67,7 @@ class Event(models.Model):
     def __unicode__(self):
         return "%s" % self.name
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, *args, **kwargs):
         return reverse("tavern_event_details", args=[str(self.slug)])
 
     def save(self, *args, **kwargs):
