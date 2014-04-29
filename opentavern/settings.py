@@ -49,6 +49,8 @@ INSTALLED_APPS = (
     'allauth.socialaccount',
 
     'allauth.socialaccount.providers.twitter',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.openid',
 
 )
 
@@ -131,3 +133,10 @@ AUTHENTICATION_BACKENDS = (
     # 'allauth' specific authentication methods, such as login by e-mail
     "allauth.account.auth_backends.AuthenticationBackend",
 )
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': ['https://www.googleapis.com/auth/userinfo.profile'],
+        'AUTH_PARAMS': {'access_type': 'online'}
+    }
+}

@@ -31,7 +31,6 @@
                 {% else %}
 
                   <li><a href="{% url 'signup' %}" title="SignUp"> SignUp</a></li>
-				  <a href="{% provider_login_url 'twitter' method='oauth2' %}">signup with twitter</a>
                   <form action="{% url 'signin' %}" method="POST" >
                       {% csrf_token %}
                       <input type="text" name="username" id="id_username" placeholder="Username">
@@ -45,7 +44,7 @@
           </div>
         </div>
       </div>
-      <div style="padding-top: 66px;">{% block content %}{% endblock %}</div>
+      <div style="padding-top: 100px;">{% block content %}{% endblock %}</div>
     </div>
   </body>
 </html>
