@@ -44,7 +44,7 @@
   <div align="center">
   <div class="alert alert-success">or sign up with</div>
   <a href="{% provider_login_url 'twitter' method='oauth2' %}"><button type="button" class="btn btn-info">Twitter</button></a>
-  {# <a href="{% provider_login_url 'facebook' method='js_skd' %}"><button type="button" class="btn btn-primary">Facebook</button></a> #}
+  <a href="{% provider_login_url 'facebook' method='oauth2' %}"><button type="button" class="btn btn-primary">Facebook</button></a>
   <a href="{% provider_login_url 'openid' openid="https://www.google.com/accounts/o8/id" next="/" %}"><button type="button" class="btn btn-danger">Google</button></a>
   </div>
 </div>
