@@ -29,7 +29,7 @@ class TavernGroup(models.Model):
         return "%s" % self.name
 
     def get_absolute_url(self):
-        return reverse("tavern_group_details", {'slug': self.slug})
+        return reverse("tavern_group_details", kwargs={'slug': self.slug})
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
@@ -68,7 +68,7 @@ class Event(models.Model):
         return "%s" % self.name
 
     def get_absolute_url(self):
-        return reverse("tavern_event_details", {'slug': self.slug})
+        return reverse("tavern_event_details", kwargs={'slug': self.slug})
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
