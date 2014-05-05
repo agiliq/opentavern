@@ -4,7 +4,6 @@ from django.utils import timezone
 
 from .slugify import unique_slugify
 
-from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist
 
 
@@ -24,9 +23,6 @@ class TavernGroup(models.Model):
     creator = models.ForeignKey(User, related_name="created_groups")
     organizers = models.ManyToManyField(User)
     slug = models.SlugField(max_length=50)
-
-    def get_absolute_url(self):
-        return reverse("tavern_group_details", args=[str(self.slug)])
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
@@ -63,9 +59,6 @@ class Event(models.Model):
     slug = models.SlugField(max_length=250)
 
     creator = models.ForeignKey(User)
-
-    def get_absolute_url(self):
-        return reverse("tavern_event_details", args=[str(self.slug)])
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
