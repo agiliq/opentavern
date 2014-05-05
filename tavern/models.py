@@ -25,9 +25,6 @@ class TavernGroup(models.Model):
     organizers = models.ManyToManyField(User)
     slug = models.SlugField(max_length=50)
 
-    def __unicode__(self):
-        return "%s" % self.name
-
     def get_absolute_url(self):
         return reverse("tavern_group_details", kwargs={'slug': self.slug})
 
@@ -39,6 +36,9 @@ class TavernGroup(models.Model):
         except ObjectDoesNotExist:
             Member.objects.create(user=self.creator, tavern_group=self,
                                   join_date=timezone.now().isoformat())
+
+    def __unicode__(self):
+        return "%s" % self.name
 
 
 class Member(models.Model):
@@ -64,9 +64,6 @@ class Event(models.Model):
 
     creator = models.ForeignKey(User)
 
-    def __unicode__(self):
-        return "%s" % self.name
-
     def get_absolute_url(self):
         return reverse("tavern_event_details", kwargs={'slug': self.slug})
 
@@ -81,6 +78,9 @@ class Event(models.Model):
                                     event=self,
                                     rsvped_on=timezone.now().isoformat(),
                                     rsvp_status='yes')
+
+    def __unicode__(self):
+        return "%s" % self.name
 
 
 RSVP_CHOICES = (('yes', 'Yes'), ('no', 'No'), ('maybe', 'May Be'))
