@@ -18,4 +18,6 @@ urlpatterns = patterns('',
                        url(r'^(?P<slug>[\w-]+)/tavern_event_update',
                            views.tavern_event_update,
                            name='tavern_event_update'),
+                       url(r'^tavern_toggle_member', views.tavern_toggle_member,
+                           name='tavern_toggle_member'),
                        )

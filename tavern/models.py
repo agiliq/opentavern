@@ -1,9 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 from .slugify import unique_slugify
 
-from django.core.urlresolvers import reverse
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class TavernGroup(models.Model):
@@ -23,15 +24,17 @@ class TavernGroup(models.Model):
     organizers = models.ManyToManyField(User)
     slug = models.SlugField(max_length=50)
 
-    def __unicode__(self):
-        return self.name
-
-    def get_absolute_url(self):
-        return reverse("tavern_group_details", args=[str(self.slug)])
-
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
         super(TavernGroup, self).save(*args, **kwargs)
+        try:
+            Member.objects.get(user=self.creator, tavern_group=self)
+        except ObjectDoesNotExist:
+            Member.objects.create(user=self.creator, tavern_group=self,
+                                  join_date=timezone.now().isoformat())
+
+    def __unicode__(self):
+        return "%s" % self.name
 
 
 class Member(models.Model):
@@ -57,15 +60,20 @@ class Event(models.Model):
 
     creator = models.ForeignKey(User)
 
-    def __unicode__(self):
-        return self.name
-
-    def get_absolute_url(self):
-        return reverse("tavern_event_details", args=[str(self.slug)])
-
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
         super(Event, self).save(*args, **kwargs)
+        member = Member.objects.get(user=self.creator, tavern_group=self.group)
+        try:
+            Attendee.objects.get(user=self.creator, member=member, event=self)
+        except ObjectDoesNotExist:
+            Attendee.objects.create(user=self.creator, member=member,
+                                    event=self,
+                                    rsvped_on=timezone.now().isoformat(),
+                                    rsvp_status='yes')
+
+    def __unicode__(self):
+        return "%s" % self.name
 
 
 RSVP_CHOICES = (('yes', 'Yes'), ('no', 'No'), ('maybe', 'May Be'))

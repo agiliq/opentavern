@@ -2,14 +2,38 @@
 
 {% block content %}
     <h1> Group Name: {{ group.name }} </h1>
+    <button id="is_member" type="button" onclick="toggle_member('{{ user.id }}', '{{ group.slug }}')">
+        {% if user_is_member %}
+            Unjoin group
+        {% else %}
+            Join group
+        {% endif %}
+    </button>
     <h1> Recently Joined: {{ user.name }} </h1>
     <ul>
     {% for member in recent_group_members %}
         <li>{{ member.user }}</li>
     {% endfor %}
     </ul>
-    <h3><a href="{% url 'tavern_group_update' group.slug %}">Edit Group</a></h3>
+    {% if user_is_creator %}
+        <h3><a href="{% url 'tavern_group_update' group.slug %}">Edit Group</a></h3>
+    {% endif %}
     {% include 'past_events.html' %}
 
     {% include 'upcoming_events.html' %}
+    
 {% endblock content %}
+
+{% block javascript %}
+    <script>
+        function toggle_member(user, slug) {
+            var url = "{% url 'tavern_toggle_member' %}";
+            $.post(url,
+                   {user_id:user, slug:slug,
+                   csrfmiddlewaretoken: '{{ csrf_token }}'},
+                   function(data) {
+                    $("#is_member").html(data);
+                   });
+        }
+    </script>
+{% endblock %}

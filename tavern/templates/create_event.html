@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 
 {% block javascript %}
+	  <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+      <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
+      <link rel="stylesheet" type="text/css" media="all" href="{{ STATIC_URL }}css/daterangepicker-bs3.css" />
+      <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/moment.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/daterangepicker.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}eternicode-bootstrap-datepicker-b374f23/js/bootstrap-datepicker.js"></script>
 {% endblock %}
 {% block content %}
@@ -43,14 +49,23 @@
   
 </form>
 	  <!-- Date Picker -->
-			<link rel="stylesheet" href="{{ STATIC_URL }}css/jquery-ui.css">
-			<script src="{{ STATIC_URL }}js/jquery-ui.js"></script>
-	  
-			<script>
-				  $(function() {
-				  $( "#id_starts_at" ).datepicker({'minDate': 0});
-				  $( "#id_ends_at" ).datepicker({'minDate': 0});
-				  });
-			</script>
+			<!--<link rel="stylesheet" href="{{ STATIC_URL }}css/jquery-ui.css">-->
+			<!--<script src="{{ STATIC_URL }}js/jquery-ui.js"></script>-->
+			<!---->
+			<!--<script>-->
+			<!--	  $(function() {-->
+			<!--	  $( "#id_starts_at" ).datepicker({'minDate': 0});-->
+			<!--	  $( "#id_ends_at" ).datepicker({'minDate': 0});-->
+			<!--	  });-->
+			<!--</script>-->
+			<script type="text/javascript">
+               $(document).ready(function() {
+                  $('#id_event_time').daterangepicker({
+                    timePicker: true,
+                    timePickerIncrement: 30,
+                    format: 'MM/DD/YYYY h:mm A'
+                  });
+               });
+               </script>
 	  <!-- Date Picker -->
 {% endblock content%}

@@ -1,10 +1,13 @@
 """ Opentavern Views"""
 from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from django.views.generic.edit import UpdateView
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+from django.http import HttpResponse
+from django.contrib.auth.models import User
+from django.http import Http404
+from django.shortcuts import get_object_or_404
 
 import json
 
@@ -21,16 +24,21 @@ def today_date():
 def index(request, template='home.html'):
     """ index page """
     if request.user.is_authenticated():
-        groups = request.user.taverngroup_set.all()
+        groups = request.user.tavern_groups.all()
+        joined_groups = [group.tavern_group for group in groups]
+        all_groups = TavernGroup.objects.all()
+        unjoined_groups = list(set(all_groups) - set(joined_groups))
         upcoming_events = Event.objects.filter(starts_at__gt=today_date())
-        events_rsvped = Attendee.objects.filter(user_id=request.user.id)
+        events = Attendee.objects.filter(user_id=request.user.id)
+        events_rsvped = [event.event for event in events]
 
-        context = {'groups': groups,
+        context = {'joined_groups': joined_groups,
+                   'unjoined_groups': unjoined_groups,
                    'upcoming_events': upcoming_events,
                    'events_rsvped': events_rsvped}
     else:
-        groups = TavernGroup.objects.all()
-        context = {'groups': groups}
+        joined_groups = TavernGroup.objects.all()
+        context = {'joined_groups': joined_groups}
     return render(request, template, context)
 
 
@@ -39,23 +47,59 @@ def group_details(request, slug):
     template = "group_details.html"
     upcoming_events = Event.objects.filter(starts_at__gt=today_date())
     past_events = Event.objects.filter(starts_at__lt=today_date())
-    context = {'upcoming_events': upcoming_events, 'past_events': past_events}
+    context = {'user': request.user,
+               'upcoming_events': upcoming_events,
+               'past_events': past_events}
+    try:
+        Member.objects.get(tavern_group=TavernGroup.objects.get(slug=slug),
+                           user=request.user)
+        user_is_member = True
+    except Member.DoesNotExist:
+        user_is_member = False
+    context.update({'user_is_member': user_is_member})
+
+    try:
+        tavern_group = TavernGroup.objects.get(slug=slug, creator=request.user)
+        user_is_creator = True
+    except TavernGroup.DoesNotExist:
+        user_is_creator = False
+    context.update({'user_is_creator': user_is_creator})
+
     try:
         recent_group_members = Member.objects.filter(
             tavern_group=TavernGroup.objects.get(slug=slug)
-            ).order_by('-join_date')[:5]
-    except ObjectDoesNotExist:
-        return render(request, '404.html', context)
+        ).order_by('-join_date')[:5]
+    except Member.DoesNotExist:
+        user_is_member = False
+        raise Http404
 
     context.update({"recent_group_members": recent_group_members})
 
-    try:
-        group = TavernGroup.objects.get(slug=slug)
-        context.update({'group': group})
-    except ObjectDoesNotExist:
-        return render(request, '404.html', context)
+    group = get_object_or_404(TavernGroup, slug=slug)
+    context.update({'group': group})
 
     return render(request, template, context)
+
+
+def tavern_toggle_member(request):
+    """
+    Adds a member to the group if he's not in the group, or
+    deletes a member if he's already a member
+    """
+
+    user = get_object_or_404(User, id=request.POST.get('user_id'))
+    group = get_object_or_404(TavernGroup, slug=request.POST.get('slug'))
+    try:
+        member = Member.objects.get(user=user, tavern_group=group)
+        response = "Join Group"
+        member.delete()
+    except Member.DoesNotExist:
+        member = Member.objects.create(
+            user=user,
+            tavern_group=group,
+            join_date=today_date())
+        response = "Unjoin Group"
+    return HttpResponse(response)
 
 
 def event_details(request, slug):
@@ -67,10 +111,15 @@ def event_details(request, slug):
     context = {"upcoming_events": upcoming_events,
                "event_attendees": event_attendees}
     try:
-        event = Event.objects.get(slug=slug)
-        context.update({'event': event})
-    except ObjectDoesNotExist:
-        return render(request, '404.html', context)
+        event = Event.objects.get(slug=slug, creator=request.user)
+        # condition to test if the event has already started.
+        editable = event.starts_at > timezone.now()
+    except Event.DoesNotExist:
+        editable = False
+    context.update({'editable': editable})
+
+    event = get_object_or_404(Event, slug=slug)
+    context.update({'event': event})
 
     return render(request, template, context)
 
@@ -106,9 +155,6 @@ def create_group(request, template='create_group.html'):
             group = form.save(commit=False)
             group.creator = request.user
             group.save()
-            Member.objects.create(user=request.user,
-                                  tavern_group=group,
-                                  join_date=today_date())
             return redirect("tavern_group_details", slug=group.slug)
 
     context = {'form': form}
