@@ -4,12 +4,10 @@ from django.utils import timezone
 
 from .slugify import unique_slugify
 
-from django.core.exceptions import ObjectDoesNotExist
-
 
 class TavernGroup(models.Model):
     "Similar interests group, create events for these"
-    name = models.CharField(max_length=40)
+    name = models.CharField(max_length=40, unique=True)
     group_type = models.CharField(max_length=100)
     description = models.CharField(max_length=200)
     members_name = models.CharField(verbose_name="Member's Name",
@@ -27,11 +25,10 @@ class TavernGroup(models.Model):
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
         super(TavernGroup, self).save(*args, **kwargs)
-        try:
-            Member.objects.get(user=self.creator, tavern_group=self)
-        except ObjectDoesNotExist:
-            Member.objects.create(user=self.creator, tavern_group=self,
-                                  join_date=timezone.now().isoformat())
+        Member.objects.get_or_create(
+            user=self.creator,
+            tavern_group=self,
+            defaults={'join_date': timezone.now().isoformat()})
 
     def __unicode__(self):
         return "%s" % self.name
@@ -60,17 +57,19 @@ class Event(models.Model):
 
     creator = models.ForeignKey(User)
 
+    class Meta:
+        unique_together = ('group', 'name')
+
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
         super(Event, self).save(*args, **kwargs)
         member = Member.objects.get(user=self.creator, tavern_group=self.group)
-        try:
-            Attendee.objects.get(user=self.creator, member=member, event=self)
-        except ObjectDoesNotExist:
-            Attendee.objects.create(user=self.creator, member=member,
-                                    event=self,
-                                    rsvped_on=timezone.now().isoformat(),
-                                    rsvp_status='yes')
+        Attendee.objects.get_or_create(
+            user=self.creator,
+            member=member,
+            event=self,
+            defaults={'rsvped_on': timezone.now().isoformat(),
+                      'rsvp_status': 'yes'})
 
     def __unicode__(self):
         return "%s" % self.name
