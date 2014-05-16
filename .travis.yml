@@ -10,6 +10,9 @@ install:
 
 before_script:
   - ./lint.sh
+  
+notifications:
+  slack: agiliq:4rM97fcM3RrHNA3EssNXYG3V  
 
 script:  coverage run manage.py test
 
