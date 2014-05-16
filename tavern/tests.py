@@ -1,7 +1,9 @@
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 
-from .models import TavernGroup, Member
+from .models import TavernGroup, Member, Event, Attendee
+
+from datetime import datetime, timedelta
 
 
 class TestModels(TestCase):
@@ -34,13 +36,88 @@ class TestModels(TestCase):
         self.assertEqual(TavernGroup.objects.count(), 1)
         self.assertEqual(Member.objects.count(), 1)
 
+    def test_tavern_attendees(self):
+        """Test to assert that two attendee objects are
+           created.One object is created after an Event
+           and one object after Attendee"""
 
-class TestIndex(TestCase):
+        event = create_and_get_event()
+        member = Member.objects.all()[0]
+        self.assertEqual(Attendee.objects.count(), 1)
+        attendee = Attendee.objects.create(user=event.creator,
+                                           member=member,
+                                           event=event,
+                                           rsvped_on=datetime.now(),
+                                           rsvp_status="yes")
+        self.assertEqual(Attendee.objects.count(), 2)
 
-    def test_http_200(self):
-        client = Client()
-        response = client.get("/")
+
+class TestViews(TestCase):
+
+    def setUp(self):
+        self.user = create_and_get_user()
+        self.client = Client()
+        self.client.login(username="test", password="test")
+
+    #def test_today_date(self):
+        #self.assertEqual(today_date(), timezone.now().isoformat())
+
+    def test_index(self):
+        response = self.client.get("/")
+        self.assertEqual(len(response.context['joined_groups']), 0)
         self.assertEqual(response.status_code, 200)
+
+        self.client.logout()
+        response = self.client.get("/")
+        self.assertEqual(len(response.context['joined_groups']), 0)
+        self.assertEqual(response.status_code, 200)
+
+    def test_create_event(self):
+        creator = self.user
+        group = create_and_get_tavern_group(creator)
+        response = self.client.post(
+            "/create_event/",
+            {'event_time': u'16/05/2014 12:00 AM - 16/05/2014 12:00 AM',
+             'group': group.id,
+             'name': 'Test',
+             'description': 'Test Event',
+             'location': 'Hyderabad'})
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.get('/create_event/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_create_group(self):
+        creator = self.user
+        response = self.client.post(
+            "/create_group/",
+            {'name': 'OpenTavern',
+             'group_type': 'Technical',
+             'description': 'A Test Group',
+             'members_name': 'Djangoers',
+             'country': 'India',
+             'city': 'Hyderabad'})
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.get('/create_group/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_group_details(self):
+        creator = self.user
+        group = create_and_get_tavern_group(creator)
+        response = self.client.get('/groups/%s' % group.slug)
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get('/groups/%s' % 'Incorrect_Slug')
+        self.assertEqual(response.status_code, 404)
+
+    def test_event_details(self):
+        event = create_and_get_event(self.user)
+        response = self.client.get('/events/%s' % event.slug)
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get('/events/%s' % 'incorrect_slug')
+        self.assertEqual(response.status_code, 404)
 
 
 def create_and_get_user():
@@ -53,3 +130,22 @@ def create_and_get_tavern_group(creator, organizers=None):
     if organizers:
         group.organizers.add(organizers)
     return group
+
+
+def create_and_get_event(user=None):
+    ends_at = datetime.now() + timedelta(days=1)
+
+    if user:
+        creator = user
+    else:
+        creator = create_and_get_user()
+
+    group = create_and_get_tavern_group(creator)
+    event = Event.objects.create(group=group,
+                                 name="Tavern Event",
+                                 description="Test cases",
+                                 starts_at=datetime.now(),
+                                 ends_at=ends_at,
+                                 location="Hyderabad",
+                                 creator=creator)
+    return event
