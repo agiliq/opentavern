@@ -19,3 +19,7 @@ Todo
 * Events calendar
 * Can charge for events (Or keep it free)
 * Social login
+
+Demo
+------
+[http://opentavern.herokuapp.com/](http://opentavern.herokuapp.com/)
