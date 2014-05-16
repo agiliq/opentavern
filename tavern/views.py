@@ -54,7 +54,7 @@ def group_details(request, slug):
         Member.objects.get(tavern_group=TavernGroup.objects.get(slug=slug),
                            user=request.user)
         user_is_member = True
-    except Member.DoesNotExist:
+    except (Member.DoesNotExist, TavernGroup.DoesNotExist):
         user_is_member = False
     context.update({'user_is_member': user_is_member})
 
@@ -69,7 +69,7 @@ def group_details(request, slug):
         recent_group_members = Member.objects.filter(
             tavern_group=TavernGroup.objects.get(slug=slug)
         ).order_by('-join_date')[:5]
-    except Member.DoesNotExist:
+    except (Member.DoesNotExist, TavernGroup.DoesNotExist):
         user_is_member = False
         raise Http404
 
