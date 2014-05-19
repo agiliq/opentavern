@@ -1,7 +1,7 @@
 # .coveragerc to control coverage.py
 [run]
 branch = True
-omit = */home/agiliq/manju/OT/env/*
+omit = */home/travis/virtualenv/*
 
 [report]
 # Regexes for lines to exclude from consideration
