@@ -9,8 +9,8 @@ OpenTavern is a self hosted meetup group organizer.
 It allows you to create local communities around shared interest groups.
 
 
-Todo
--------
+Features
+----------
 
 * Allow creating events
 * Organizers and attendees
