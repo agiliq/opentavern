@@ -36,6 +36,9 @@ class TestModels(TestCase):
         self.assertEqual(TavernGroup.objects.count(), 1)
         self.assertEqual(Member.objects.count(), 1)
 
+        member = Member.objects.all()[0]
+        self.assertEqual(member.__unicode__(), u'test - TestGroup')
+
     def test_tavern_attendees(self):
         """Test to assert that two attendee objects are
            created.One object is created after an Event
@@ -43,6 +46,8 @@ class TestModels(TestCase):
 
         event = create_and_get_event()
         member = Member.objects.all()[0]
+        self.assertEqual(event.__unicode__(), 'Tavern Event')
+
         self.assertEqual(Attendee.objects.count(), 1)
         attendee = Attendee.objects.create(user=event.creator,
                                            member=member,
@@ -50,6 +55,7 @@ class TestModels(TestCase):
                                            rsvped_on=datetime.now(),
                                            rsvp_status="yes")
         self.assertEqual(Attendee.objects.count(), 2)
+        self.assertEqual(attendee.__unicode__(), u' - Tavern Event')
 
 
 class TestViews(TestCase):
@@ -119,13 +125,35 @@ class TestViews(TestCase):
         response = self.client.get('/events/%s' % 'incorrect_slug')
         self.assertEqual(response.status_code, 404)
 
+    def test_tavern_toggle_member(self):
+        group = create_and_get_tavern_group(self.user)
+        response = self.client.post(
+            '/tavern_toggle_member/',
+            {'user_id': self.user.id,
+             'slug': group.slug})
+        self.assertEqual(response.status_code, 200)
+
+        user = User.objects.create_user(username='test2',
+                                        email='test2@agiliq.com',
+                                        password='test2')
+        group = create_and_get_tavern_group(user)
+        response = self.client.post(
+            '/tavern_toggle_member/',
+            {'user_id': self.user.id,
+             'slug': group.slug})
+        self.assertEqual(response.status_code, 200)
+
 
 def create_and_get_user():
-    return User.objects.create_user(username='test', email='test@agiliq.com', password='test')
+    return User.objects.create_user(username='test',
+                                    email='test@agiliq.com',
+                                    password='test')
 
 
 def create_and_get_tavern_group(creator, organizers=None):
-    group = TavernGroup(name='TestGroup', description='A group for testing', creator=creator)
+    group = TavernGroup(name='TestGroup',
+                        description='A group for testing',
+                        creator=creator)
     group.save()
     if organizers:
         group.organizers.add(organizers)

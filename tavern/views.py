@@ -9,8 +9,6 @@ from django.contrib.auth.models import User
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 
-import json
-
 from .models import TavernGroup, Member, Event, Attendee
 from .forms import CreateGroupForm, CreateEventForm
 
@@ -124,24 +122,24 @@ def event_details(request, slug):
     return render(request, template, context)
 
 
-def rsvp(request, event_id, rsvp_status):
-    """ View to set RSVP status for an event """
-    attendee = Attendee.objects.get_or_create(user__id=request.user.id,
-                                              event__id=event_id)
-    attendee.rsvp_status = rsvp_status
-    attendee.rsvped_on = timezone.now()
-    attendee.save()
+# def rsvp(request, event_id, rsvp_status):
+#     """ View to set RSVP status for an event """
+#     attendee = Attendee.objects.get_or_create(user__id=request.user.id,
+#                                               event__id=event_id)
+#     attendee.rsvp_status = rsvp_status
+#     attendee.rsvped_on = timezone.now()
+#     attendee.save()
 
-    message = 'Successfully Chaged your RSVP status. '
-    if rsvp_status == 'yes':
-        message += "You are attending this event."
-    elif rsvp_status == 'no':
-        message += "You are not attending this event."
-    elif rsvp_status == 'maybe':
-        message += "You may attend this event."
+#     message = 'Successfully Chaged your RSVP status. '
+#     if rsvp_status == 'yes':
+#         message += "You are attending this event."
+#     elif rsvp_status == 'no':
+#         message += "You are not attending this event."
+#     elif rsvp_status == 'maybe':
+#         message += "You may attend this event."
 
-    response = {'message': message}
-    return json.dumps(response)
+#     response = {'message': message}
+#     return json.dumps(response)
 
 
 @login_required
