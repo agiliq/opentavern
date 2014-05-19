@@ -15,10 +15,14 @@ Features
 * Allow creating events
 * Organizers and attendees
 * Users can RSVP, edit change rsvp
-* Attendees can leave comments on events
 * Events calendar
-* Can charge for events (Or keep it free)
 * Social login
+
+Todo
+---------
+
+* Attendees can leave comments on events
+* Can charge for events (Or keep it free)
 
 Demo
 ------
