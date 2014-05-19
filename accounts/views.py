@@ -42,17 +42,17 @@ def signin(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        
+
         user = authenticate(username=username, password=password)
         if user is not None:
             if user.is_active:
                 login(request, user)
                 return redirect('index')
-            else:   
-                messages.error(request, 'Your account is inactive')             
+            else:
+                messages.error(request, 'Your account is inactive')
                 return redirect('index')
-        else: 
-            messages.error(request, 'Invalid login credentials')             
+        else:
+            messages.error(request, 'Invalid login credentials')
             return redirect('index')
 
 
