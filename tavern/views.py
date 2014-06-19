@@ -1,14 +1,15 @@
 """ Opentavern Views"""
 from django.utils import timezone
 from django.shortcuts import render, redirect
-from django.views.generic.edit import UpdateView
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.http import Http404
 from django.shortcuts import get_object_or_404
-from django.views.generic import DetailView
+from django.views.generic import DetailView, CreateView, UpdateView
+
+from guardian.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
 from .models import TavernGroup, Member, Event, Attendee
 from .forms import CreateGroupForm, CreateEventForm
@@ -63,7 +64,7 @@ class GroupDetail(UpcomingEventsMixin, DetailView):
         tavern_group = context['group']
         try:
             Member.objects.get(tavern_group=tavern_group,
-                               user=self.request.user)
+                               user=self.request.user.id)
             user_is_member = True
         except Member.DoesNotExist:
             user_is_member = False
@@ -78,6 +79,9 @@ class GroupDetail(UpcomingEventsMixin, DetailView):
         context["recent_group_members"] = recent_group_members
 
         return context
+
+
+group_details = GroupDetail.as_view()
 
 
 def tavern_toggle_member(request):
@@ -108,17 +112,13 @@ class EventDetail(UpcomingEventsMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(EventDetail, self).get_context_data(**kwargs)
-        context['event_attendees'] = Attendee.objects.filter(event__slug=self.kwargs['slug'],
-                                              rsvp_status="yes")
-        try:
-            event = Event.objects.get(slug=self.kwargs['slug'], creator=self.request.user)
-            # condition to test if the event has already started.
-            editable = event.starts_at > timezone.now()
-        except Event.DoesNotExist:
-            editable = False
-        context['editable'] = editable
+        event = context['event']
+
+        context['event_attendees'] = Attendee.objects.filter(event=event, rsvp_status="yes")
+        context['editable'] = event.starts_at > timezone.now()
         return context
 
+event_details = EventDetail.as_view()
 
 # def rsvp(request, event_id, rsvp_status):
 #     """ View to set RSVP status for an event """
@@ -140,51 +140,49 @@ class EventDetail(UpcomingEventsMixin, DetailView):
 #     return json.dumps(response)
 
 
-@login_required
-def create_group(request, template='create_group.html'):
-    # pylint: disable=E1103
-    """ index page """
-    form = CreateGroupForm()
-    if request.method == 'POST':
-        form = CreateGroupForm(request.POST)
-        if form.is_valid():
-            group = form.save(commit=False)
-            group.creator = request.user
-            group.save()
-            return redirect("tavern_group_details", slug=group.slug)
+class GroupCreate(LoginRequiredMixin, CreateView):
+    form_class = CreateGroupForm
+    model = TavernGroup
+    template_name = "create_group.html"
 
-    context = {'form': form}
-    return render(request, template, context)
+    def form_valid(self, form):
+        form.instance.creator = self.request.user
+        return super(GroupCreate, self).form_valid(form)
 
 
-class GroupUpdate(UpdateView):
+create_group = GroupCreate.as_view()
+
+
+class GroupUpdate(PermissionRequiredMixin, UpdateView):
     model = TavernGroup
     form_class = CreateGroupForm
     template_name = 'tavern_group_update.html'
+    permission_required = 'tavern.change_taverngroup'
+    render_403 = True
+    return_403 = True
 
 tavern_group_update = GroupUpdate.as_view()
 
 
-@login_required
-def create_event(request, template='create_event.html'):
-    # pylint: disable=E1103
-    form = CreateEventForm()
-    if request.method == 'POST':
-        form = CreateEventForm(request.POST)
-        if form.is_valid():
-            event = form.save(commit=False)
-            event.creator = request.user
-            event.save()
-            return redirect(reverse("tavern_event_details",
-                                    kwargs={'slug': event.slug}))
+class EventCreate(LoginRequiredMixin, CreateView):
+    form_class = CreateEventForm
+    model = Event
+    template_name = "create_event.html"
 
-    context = {'form': form}
-    return render(request, template, context)
+    def form_valid(self, form):
+        form.instance.creator = self.request.user
+        return super(EventCreate, self).form_valid(form)
 
 
-class EventUpdate(UpdateView):
+create_event = EventCreate.as_view()
+
+
+class EventUpdate(PermissionRequiredMixin, UpdateView):
     model = Event
     form_class = CreateEventForm
     template_name = 'tavern_event_update.html'
+    permission_required = 'tavern.change_event'
+    render_403 = True
+    return_403 = True
 
 tavern_event_update = EventUpdate.as_view()

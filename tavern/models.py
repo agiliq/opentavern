@@ -3,6 +3,9 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 
+from django.db.models.signals import post_save
+from guardian.shortcuts import assign_perm
+
 from .slugify import unique_slugify
 
 
@@ -70,6 +73,9 @@ class Event(models.Model):
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
         super(Event, self).save(*args, **kwargs)
+        # Old check: if event creator is member of that group
+        # but it should display only those groups which the user is member of and then
+        # check in form validation and return error
         member = Member.objects.get(user=self.creator, tavern_group=self.group)
         Attendee.objects.get_or_create(
             user=self.creator,
@@ -99,3 +105,16 @@ class Attendee(models.Model):
 
     def __unicode__(self):
         return "%s - %s" % (self.user.first_name, self.event.name)
+
+def create_event_permission(sender, instance, created, **kwargs):
+    if created:
+        assign_perm('change_event', instance.creator, instance)
+        assign_perm('delete_event', instance.creator, instance)
+
+def create_group_permission(sender, instance, created, **kwargs):
+    if created:
+        assign_perm('change_taverngroup', instance.creator, instance)
+        assign_perm('delete_taverngroup', instance.creator, instance)
+
+post_save.connect(create_event_permission, sender=Event)
+post_save.connect(create_group_permission, sender=TavernGroup)
