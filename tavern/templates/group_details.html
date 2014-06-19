@@ -15,9 +15,9 @@
         <li>{{ member.user }}</li>
     {% endfor %}
     </ul>
-    {% if user_is_creator %}
+    {% ifequal group.creator user %}
         <h3><a href="{% url 'tavern_group_update' group.slug %}">Edit Group</a></h3>
-    {% endif %}
+    {% endifequal %}
     {% include 'past_events.html' %}
 
     {% include 'upcoming_events.html' %}

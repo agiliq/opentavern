@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.views.generic import DetailView
 
 from .models import TavernGroup, Member, Event, Attendee
 from .forms import CreateGroupForm, CreateEventForm
@@ -40,43 +41,43 @@ def index(request, template='home.html'):
     return render(request, template, context)
 
 
-def group_details(request, slug):
-    """ Group Details Page"""
-    template = "group_details.html"
-    upcoming_events = Event.objects.filter(starts_at__gt=today_date())
-    past_events = Event.objects.filter(starts_at__lt=today_date())
-    context = {'user': request.user,
-               'upcoming_events': upcoming_events,
-               'past_events': past_events}
-    try:
-        Member.objects.get(tavern_group=TavernGroup.objects.get(slug=slug),
-                           user=request.user)
-        user_is_member = True
-    except (Member.DoesNotExist, TavernGroup.DoesNotExist):
-        user_is_member = False
-    context.update({'user_is_member': user_is_member})
+class UpcomingEventsMixin(object):
+    """ Add upcoming events to the view """
+    def get_context_data(self, **kwargs):
+        context = super(UpcomingEventsMixin, self).get_context_data(**kwargs)
+        context['upcoming_events'] = Event.objects.filter(starts_at__gt=today_date())
+        return context
 
-    try:
-        tavern_group = TavernGroup.objects.get(slug=slug, creator=request.user)
-        user_is_creator = True
-    except TavernGroup.DoesNotExist:
-        user_is_creator = False
-    context.update({'user_is_creator': user_is_creator})
 
-    try:
-        recent_group_members = Member.objects.filter(
-            tavern_group=TavernGroup.objects.get(slug=slug)
-        ).order_by('-join_date')[:5]
-    except (Member.DoesNotExist, TavernGroup.DoesNotExist):
-        user_is_member = False
-        raise Http404
 
-    context.update({"recent_group_members": recent_group_members})
+class GroupDetail(UpcomingEventsMixin, DetailView):
+    """ Group details Page """
+    template_name = "group_details.html"
+    context_object_name = "group"
+    model = TavernGroup
 
-    group = get_object_or_404(TavernGroup, slug=slug)
-    context.update({'group': group})
+    def get_context_data(self, **kwargs):
+        context = super(GroupDetail, self).get_context_data(**kwargs)
+        context['past_events'] = Event.objects.filter(starts_at__lt=today_date())
 
-    return render(request, template, context)
+        tavern_group = context['group']
+        try:
+            Member.objects.get(tavern_group=tavern_group,
+                               user=self.request.user)
+            user_is_member = True
+        except Member.DoesNotExist:
+            user_is_member = False
+        context['user_is_member'] = user_is_member
+
+        # Raise 404 when there are no members in that group. TODO: is 404 it needed?
+        try:
+            recent_group_members = Member.objects.filter(
+                tavern_group=tavern_group).order_by('-join_date')[:5]
+        except Member.DoesNotExist:
+            raise Http404
+        context["recent_group_members"] = recent_group_members
+
+        return context
 
 
 def tavern_toggle_member(request):
@@ -100,26 +101,23 @@ def tavern_toggle_member(request):
     return HttpResponse(response)
 
 
-def event_details(request, slug):
-    """ Event Details View """
-    template = "event_details.html"
-    upcoming_events = Event.objects.filter(starts_at__gt=today_date())
-    event_attendees = Attendee.objects.filter(event__slug=slug,
+class EventDetail(UpcomingEventsMixin, DetailView):
+    template_name = "event_details.html"
+    context_object_name = "event"
+    model = Event
+
+    def get_context_data(self, **kwargs):
+        context = super(EventDetail, self).get_context_data(**kwargs)
+        context['event_attendees'] = Attendee.objects.filter(event__slug=self.kwargs['slug'],
                                               rsvp_status="yes")
-    context = {"upcoming_events": upcoming_events,
-               "event_attendees": event_attendees}
-    try:
-        event = Event.objects.get(slug=slug, creator=request.user)
-        # condition to test if the event has already started.
-        editable = event.starts_at > timezone.now()
-    except Event.DoesNotExist:
-        editable = False
-    context.update({'editable': editable})
-
-    event = get_object_or_404(Event, slug=slug)
-    context.update({'event': event})
-
-    return render(request, template, context)
+        try:
+            event = Event.objects.get(slug=self.kwargs['slug'], creator=self.request.user)
+            # condition to test if the event has already started.
+            editable = event.starts_at > timezone.now()
+        except Event.DoesNotExist:
+            editable = False
+        context['editable'] = editable
+        return context
 
 
 # def rsvp(request, event_id, rsvp_status):
