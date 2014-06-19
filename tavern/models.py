@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.core.urlresolvers import reverse
 
 from .slugify import unique_slugify
 
@@ -21,6 +22,9 @@ class TavernGroup(models.Model):
     creator = models.ForeignKey(User, related_name="created_groups")
     organizers = models.ManyToManyField(User)
     slug = models.SlugField(max_length=50)
+
+    def get_absolute_url(self):
+        return reverse("tavern_group_details", kwargs={"slug": self.slug})
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
@@ -59,6 +63,9 @@ class Event(models.Model):
 
     class Meta:
         unique_together = ('group', 'name')
+
+    def get_absolute_url(self):
+        return reverse("tavern_event_details", kwargs={"slug": self.slug})
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
