@@ -1,11 +1,9 @@
 """ Opentavern Views"""
 from django.utils import timezone
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.contrib.auth.models import User
-from django.http import Http404
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.views.generic import DetailView, CreateView, UpdateView
 
