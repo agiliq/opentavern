@@ -1,15 +1,15 @@
 """ Opentavern Views"""
 from django.utils import timezone
-from django.shortcuts import render, redirect
-from django.views.generic.edit import UpdateView
+from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.contrib.auth.models import User
-from django.http import Http404
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
+from django.views.generic import DetailView, CreateView, UpdateView
 
-from .models import TavernGroup, Member, Event, Attendee
+from guardian.mixins import LoginRequiredMixin, PermissionRequiredMixin
+
+from .models import TavernGroup, Membership, Event, Attendee
 from .forms import CreateGroupForm, CreateEventForm
 
 
@@ -21,10 +21,9 @@ def today_date():
 
 def index(request, template='home.html'):
     """ index page """
+    all_groups = TavernGroup.objects.all()
     if request.user.is_authenticated():
-        groups = request.user.tavern_groups.all()
-        joined_groups = [group.tavern_group for group in groups]
-        all_groups = TavernGroup.objects.all()
+        joined_groups = request.user.tavern_groups.all()
         unjoined_groups = list(set(all_groups) - set(joined_groups))
         upcoming_events = Event.objects.filter(starts_at__gt=today_date())
         events = Attendee.objects.filter(user_id=request.user.id)
@@ -35,50 +34,29 @@ def index(request, template='home.html'):
                    'upcoming_events': upcoming_events,
                    'events_rsvped': events_rsvped}
     else:
-        joined_groups = TavernGroup.objects.all()
-        context = {'joined_groups': joined_groups}
+        context = {'groups': all_groups}
     return render(request, template, context)
 
+@login_required
+def rsvp(request, event_id, rsvp_status):
+    """ View to set RSVP status for an event """
+    attendee = Attendee.objects.get_or_create(user__id=request.user.id,
+                                              event__id=event_id)[0]
+    attendee.rsvp_status = rsvp_status
+    attendee.rsvped_on = timezone.now()
+    attendee.save()
 
-def group_details(request, slug):
-    """ Group Details Page"""
-    template = "group_details.html"
-    upcoming_events = Event.objects.filter(starts_at__gt=today_date())
-    past_events = Event.objects.filter(starts_at__lt=today_date())
-    context = {'user': request.user,
-               'upcoming_events': upcoming_events,
-               'past_events': past_events}
-    try:
-        Member.objects.get(tavern_group=TavernGroup.objects.get(slug=slug),
-                           user=request.user)
-        user_is_member = True
-    except (Member.DoesNotExist, TavernGroup.DoesNotExist):
-        user_is_member = False
-    context.update({'user_is_member': user_is_member})
+    message = 'Successfully Chaged your RSVP status. '
+    if rsvp_status == 'yes':
+        message += "You are attending this event."
+    elif rsvp_status == 'no':
+        message += "You are not attending this event."
+    elif rsvp_status == 'maybe':
+        message += "You may attend this event."
 
-    try:
-        tavern_group = TavernGroup.objects.get(slug=slug, creator=request.user)
-        user_is_creator = True
-    except TavernGroup.DoesNotExist:
-        user_is_creator = False
-    context.update({'user_is_creator': user_is_creator})
+    return HttpResponse(message) #Response message not used for now
 
-    try:
-        recent_group_members = Member.objects.filter(
-            tavern_group=TavernGroup.objects.get(slug=slug)
-        ).order_by('-join_date')[:5]
-    except (Member.DoesNotExist, TavernGroup.DoesNotExist):
-        user_is_member = False
-        raise Http404
-
-    context.update({"recent_group_members": recent_group_members})
-
-    group = get_object_or_404(TavernGroup, slug=slug)
-    context.update({'group': group})
-
-    return render(request, template, context)
-
-
+@login_required
 def tavern_toggle_member(request):
     """
     Adds a member to the group if he's not in the group, or
@@ -88,11 +66,11 @@ def tavern_toggle_member(request):
     user = get_object_or_404(User, id=request.POST.get('user_id'))
     group = get_object_or_404(TavernGroup, slug=request.POST.get('slug'))
     try:
-        member = Member.objects.get(user=user, tavern_group=group)
+        member = Membership.objects.get(user=user, tavern_group=group)
         response = "Join Group"
         member.delete()
-    except Member.DoesNotExist:
-        member = Member.objects.create(
+    except Membership.DoesNotExist:
+        member = Membership.objects.create(
             user=user,
             tavern_group=group,
             join_date=today_date())
@@ -100,93 +78,104 @@ def tavern_toggle_member(request):
     return HttpResponse(response)
 
 
-def event_details(request, slug):
-    """ Event Details View """
-    template = "event_details.html"
-    upcoming_events = Event.objects.filter(starts_at__gt=today_date())
-    event_attendees = Attendee.objects.filter(event__slug=slug,
-                                              rsvp_status="yes")
-    context = {"upcoming_events": upcoming_events,
-               "event_attendees": event_attendees}
-    try:
-        event = Event.objects.get(slug=slug, creator=request.user)
-        # condition to test if the event has already started.
-        editable = event.starts_at > timezone.now()
-    except Event.DoesNotExist:
-        editable = False
-    context.update({'editable': editable})
-
-    event = get_object_or_404(Event, slug=slug)
-    context.update({'event': event})
-
-    return render(request, template, context)
+class UpcomingEventsMixin(object):
+    """ Add upcoming events to the view """
+    def get_context_data(self, **kwargs):
+        context = super(UpcomingEventsMixin, self).get_context_data(**kwargs)
+        context['upcoming_events'] = Event.objects.filter(starts_at__gt=today_date())
+        return context
 
 
-# def rsvp(request, event_id, rsvp_status):
-#     """ View to set RSVP status for an event """
-#     attendee = Attendee.objects.get_or_create(user__id=request.user.id,
-#                                               event__id=event_id)
-#     attendee.rsvp_status = rsvp_status
-#     attendee.rsvped_on = timezone.now()
-#     attendee.save()
+class GroupDetail(UpcomingEventsMixin, DetailView):
+    """ Group details Page """
+    template_name = "group_details.html"
+    context_object_name = "group"
+    model = TavernGroup
 
-#     message = 'Successfully Chaged your RSVP status. '
-#     if rsvp_status == 'yes':
-#         message += "You are attending this event."
-#     elif rsvp_status == 'no':
-#         message += "You are not attending this event."
-#     elif rsvp_status == 'maybe':
-#         message += "You may attend this event."
+    def get_context_data(self, **kwargs):
+        context = super(GroupDetail, self).get_context_data(**kwargs)
+        context['past_events'] = Event.objects.filter(starts_at__lt=today_date())
 
-#     response = {'message': message}
-#     return json.dumps(response)
+        tavern_group = context['group']
+        try:
+            Membership.objects.get(tavern_group=tavern_group,
+                               user=self.request.user.id)
+            user_is_member = True
+        except Membership.DoesNotExist:
+            user_is_member = False
+        context['user_is_member'] = user_is_member
 
+        recent_group_members = get_list_or_404(Membership, tavern_group=tavern_group)[:5]
+        context["recent_group_members"] = recent_group_members
 
-@login_required
-def create_group(request, template='create_group.html'):
-    # pylint: disable=E1103
-    """ index page """
-    form = CreateGroupForm()
-    if request.method == 'POST':
-        form = CreateGroupForm(request.POST)
-        if form.is_valid():
-            group = form.save(commit=False)
-            group.creator = request.user
-            group.save()
-            return redirect("tavern_group_details", slug=group.slug)
-
-    context = {'form': form}
-    return render(request, template, context)
+        return context
 
 
-class GroupUpdate(UpdateView):
+class EventDetail(UpcomingEventsMixin, DetailView):
+    """ Give details about an event and its attendees"""
+    template_name = "event_details.html"
+    context_object_name = "event"
+    model = Event
+
+    def get_context_data(self, **kwargs):
+        context = super(EventDetail, self).get_context_data(**kwargs)
+        event = context['event']
+
+        context['event_attendees'] = Attendee.objects.filter(event=event, rsvp_status="yes")
+        context['editable'] = event.starts_at > timezone.now()
+        return context
+
+
+class GroupCreate(LoginRequiredMixin, CreateView):
+    """ Create new group """
+    form_class = CreateGroupForm
+    model = TavernGroup
+    template_name = "create_group.html"
+
+    def form_valid(self, form):
+        form.instance.creator = self.request.user
+        return super(GroupCreate, self).form_valid(form)
+
+
+class GroupUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    """ Updates a group """
     model = TavernGroup
     form_class = CreateGroupForm
     template_name = 'tavern_group_update.html'
-
-tavern_group_update = GroupUpdate.as_view()
-
-
-@login_required
-def create_event(request, template='create_event.html'):
-    # pylint: disable=E1103
-    form = CreateEventForm()
-    if request.method == 'POST':
-        form = CreateEventForm(request.POST)
-        if form.is_valid():
-            event = form.save(commit=False)
-            event.creator = request.user
-            event.save()
-            return redirect(reverse("tavern_event_details",
-                                    kwargs={'slug': event.slug}))
-
-    context = {'form': form}
-    return render(request, template, context)
+    permission_required = 'tavern.change_taverngroup'
+    render_403 = True
+    return_403 = True
 
 
-class EventUpdate(UpdateView):
+class EventCreate(LoginRequiredMixin, CreateView):
+    """ Creates new Event """
+    form_class = CreateEventForm
+    model = Event
+    template_name = "create_event.html"
+
+    def get_form_kwargs(self):
+        kwargs = super(EventCreate, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.creator = self.request.user
+        return super(EventCreate, self).form_valid(form)
+
+
+class EventUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    """ Update an Event """
     model = Event
     form_class = CreateEventForm
     template_name = 'tavern_event_update.html'
+    permission_required = 'tavern.change_event'
+    render_403 = True
+    return_403 = True
 
+
+tavern_group_update = GroupUpdate.as_view()
 tavern_event_update = EventUpdate.as_view()
+create_group = GroupCreate.as_view()
+create_event = EventCreate.as_view()
+event_details = EventDetail.as_view()
+group_details = GroupDetail.as_view()

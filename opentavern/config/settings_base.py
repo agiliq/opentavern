@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'tavern',
     'accounts',
     'south',
+    'guardian',
 
     'allauth',
     'allauth.account',
@@ -130,6 +131,8 @@ AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
     # 'allauth' specific authentication methods, such as login by e-mail
     "allauth.account.auth_backends.AuthenticationBackend",
+    # per object permission from guardian
+    "guardian.backends.ObjectPermissionBackend",
 )
 
 SOCIALACCOUNT_PROVIDERS = {
@@ -143,6 +146,9 @@ SOCIALACCOUNT_PROVIDERS = {
         'METHOD': 'oauth2',
     }
 }
+
+# Guardian specific configuration
+ANONYMOUS_USER_ID = -1
 
 
 if 'heroku_env' in os.environ:

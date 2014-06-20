@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 
-from .models import TavernGroup, Member, Event, Attendee
+from .models import TavernGroup, Membership, Event, Attendee
 
 from datetime import datetime, timedelta
 
@@ -24,19 +24,19 @@ class TestModels(TestCase):
 
     def test_tavern_group_save(self):
         """When a TavernGroup is saved, we want to make sure
-        an instance of Member which associates the creator
+        an instance of Membership which associates the creator
         with group is created"""
         creator = create_and_get_user()
         tavern_group = create_and_get_tavern_group(creator=creator)
         self.assertEqual(TavernGroup.objects.count(), 1)
-        self.assertEqual(Member.objects.count(), 1)
+        self.assertEqual(Membership.objects.count(), 1)
         #Change an attribute of tavern_group
         tavern_group.description = 'Changed description'
         tavern_group.save()
         self.assertEqual(TavernGroup.objects.count(), 1)
-        self.assertEqual(Member.objects.count(), 1)
+        self.assertEqual(Membership.objects.count(), 1)
 
-        member = Member.objects.all()[0]
+        member = Membership.objects.all()[0]
         self.assertEqual(member.__unicode__(), u'test - TestGroup')
 
     def test_tavern_attendees(self):
@@ -45,12 +45,10 @@ class TestModels(TestCase):
            and one object after Attendee"""
 
         event = create_and_get_event()
-        member = Member.objects.all()[0]
         self.assertEqual(event.__unicode__(), 'Tavern Event')
 
         self.assertEqual(Attendee.objects.count(), 1)
         attendee = Attendee.objects.create(user=event.creator,
-                                           member=member,
                                            event=event,
                                            rsvped_on=datetime.now(),
                                            rsvp_status="yes")
@@ -75,7 +73,7 @@ class TestViews(TestCase):
 
         self.client.logout()
         response = self.client.get("/")
-        self.assertEqual(len(response.context['joined_groups']), 0)
+        self.assertEqual(len(response.context['groups']), 0)
         self.assertEqual(response.status_code, 200)
 
     def test_create_event(self):

@@ -1,6 +1,11 @@
+# pylint: disable=method-hidden
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.core.urlresolvers import reverse
+
+from django.db.models.signals import post_save
+from guardian.shortcuts import assign_perm
 
 from .slugify import unique_slugify
 
@@ -19,13 +24,17 @@ class TavernGroup(models.Model):
     country = models.CharField(max_length=20)
     city = models.CharField(max_length=20)
     creator = models.ForeignKey(User, related_name="created_groups")
-    organizers = models.ManyToManyField(User)
+    organizers = models.ManyToManyField(User, related_name="organizes_groups")
+    members = models.ManyToManyField(User, through="Membership", related_name="tavern_groups")
     slug = models.SlugField(max_length=50)
+
+    def get_absolute_url(self):
+        return reverse("tavern_group_details", kwargs={"slug": self.slug})
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
         super(TavernGroup, self).save(*args, **kwargs)
-        Member.objects.get_or_create(
+        Membership.objects.get_or_create(
             user=self.creator,
             tavern_group=self,
             defaults={'join_date': timezone.now().isoformat()})
@@ -34,10 +43,10 @@ class TavernGroup(models.Model):
         return "%s" % self.name
 
 
-class Member(models.Model):
+class Membership(models.Model):
     "People who are in a TavernGroup"
-    user = models.ForeignKey(User, related_name='tavern_groups')
-    tavern_group = models.ForeignKey(TavernGroup, related_name='members')
+    user = models.ForeignKey(User, related_name='tgroup_memberships')
+    tavern_group = models.ForeignKey(TavernGroup, related_name='memberships')
     join_date = models.DateTimeField()
 
     def __unicode__(self):
@@ -60,13 +69,18 @@ class Event(models.Model):
     class Meta:
         unique_together = ('group', 'name')
 
+    def get_absolute_url(self):
+        return reverse("tavern_event_details", kwargs={"slug": self.slug})
+
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
         super(Event, self).save(*args, **kwargs)
-        member = Member.objects.get(user=self.creator, tavern_group=self.group)
+        # Old check: if event creator is member of that group
+        # but it should display only those groups which the user is member of and then
+        # check in form validation and return error
+        member = Membership.objects.get(user=self.creator, tavern_group=self.group)
         Attendee.objects.get_or_create(
             user=self.creator,
-            member=member,
             event=self,
             defaults={'rsvped_on': timezone.now().isoformat(),
                       'rsvp_status': 'yes'})
@@ -81,7 +95,6 @@ RSVP_CHOICES = (('yes', 'Yes'), ('no', 'No'), ('maybe', 'May Be'))
 class Attendee(models.Model):
     "People who have RSVPed to events"
     user = models.ForeignKey(User)
-    member = models.ForeignKey(Member)
     event = models.ForeignKey(Event)
     rsvped_on = models.DateTimeField()
     rsvp_status = models.CharField(verbose_name="RSVP Status",
@@ -92,3 +105,16 @@ class Attendee(models.Model):
 
     def __unicode__(self):
         return "%s - %s" % (self.user.first_name, self.event.name)
+
+def create_event_permission(sender, instance, created, **kwargs):
+    if created:
+        assign_perm('change_event', instance.creator, instance)
+        assign_perm('delete_event', instance.creator, instance)
+
+def create_group_permission(sender, instance, created, **kwargs):
+    if created:
+        assign_perm('change_taverngroup', instance.creator, instance)
+        assign_perm('delete_taverngroup', instance.creator, instance)
+
+post_save.connect(create_event_permission, sender=Event)
+post_save.connect(create_group_permission, sender=TavernGroup)

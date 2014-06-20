@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import TavernGroup, Event, Attendee, Member
+from .models import TavernGroup, Event, Attendee, Membership
 
 
 class GroupAdmin(admin.ModelAdmin):
@@ -13,4 +13,4 @@ class EventAdmin(admin.ModelAdmin):
 admin.site.register(TavernGroup, GroupAdmin)
 admin.site.register(Event, EventAdmin)
 admin.site.register(Attendee)
-admin.site.register(Member)
+admin.site.register(Membership)

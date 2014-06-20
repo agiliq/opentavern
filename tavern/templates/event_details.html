@@ -13,10 +13,17 @@
     {% endif %}
 
     <h3>Event created by: {{ event.creator }} </h3>
+    {% if user.is_authenticated %}
+    <div class="btn-group">
+        <button type="button" onclick="change_rsvp('{{ event.id }}', 'yes')" id="rsvp-yes" class="rsvp btn btn-default">Yes</button>
+        <button type="button" onclick="change_rsvp('{{ event.id }}', 'no')" id="rsvp-no" class="rsvp btn btn-default">No</button>
+        <button type="button" onclick="change_rsvp('{{ event.id }}', 'maybe')" id="rsvp-maybe" class="rsvp btn btn-default">May be</button>
+    </div>
+    {% endif %}
     <hr/>
     <h1> Event Attendees </h1>
     <ol>
-        {%for attendee in event_attendees%}
+        {% for attendee in event_attendees %}
             <li>{{ attendee.user.first_name }}</li>
             {% empty %}
             <li style="list-style:None;">Be the first attendee.</li>
@@ -26,3 +33,15 @@
     <h3><a href="{% url 'tavern_event_update' event.slug %}">Edit Event</a></h3>
     {% endif %}
 {% endblock content %}
+
+{% block javascript %}
+    <script>
+        function change_rsvp(event_id, rsvp) {
+            var url = "/rsvp/" + event_id + "/" + rsvp + "/";
+            $.get(url, function(data) {
+                    $(".rsvp").removeClass("active");
+                    $("#rsvp-"+rsvp).addClass("active");
+                    });
+        }
+    </script>
+{% endblock %}

@@ -2,22 +2,24 @@
 
 {% block content %}
     <h1> Group Name: {{ group.name }} </h1>
-    <button id="is_member" type="button" onclick="toggle_member('{{ user.id }}', '{{ group.slug }}')">
-        {% if user_is_member %}
-            Unjoin group
-        {% else %}
-            Join group
-        {% endif %}
-    </button>
+    {% if user.is_authenticated %}
+      <button id="is_member" type="button" onclick="toggle_member('{{ user.id }}', '{{ group.slug }}')">
+          {% if user_is_member %}
+              Unjoin group
+          {% else %}
+              Join group
+          {% endif %}
+      </button>
+    {% endif %}
     <h1> Recently Joined: {{ user.name }} </h1>
     <ul>
     {% for member in recent_group_members %}
         <li>{{ member.user }}</li>
     {% endfor %}
     </ul>
-    {% if user_is_creator %}
+    {% ifequal group.creator user %}
         <h3><a href="{% url 'tavern_group_update' group.slug %}">Edit Group</a></h3>
-    {% endif %}
+    {% endifequal %}
     {% include 'past_events.html' %}
 
     {% include 'upcoming_events.html' %}

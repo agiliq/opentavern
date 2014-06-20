@@ -23,7 +23,7 @@
         {% empty %}
         <li class="list-group-item">No groups joined</li>
     {% endfor %}
-    
+
     {% for group in unjoined_groups %}
         <li class="list-group-item">
             <a href="{% url 'tavern_group_details' group.slug %}">{{ group.name }}</a>
@@ -57,10 +57,14 @@
 
     {% else %}
         {% if groups %}
-        <ul>
+        <ul class="list-group">
             <h1>All Groups </h1>
             {% for group in groups %}
-                <li>{{ group.name }}</li>
+               <li class="list-group-item">
+                   <a href="{% url 'tavern_group_details' group.slug %}">{{ group.name }}</a>
+               </li>
+            {% empty %}
+            <li class="list-group-item">No groups joined</li>
             {% endfor %}
         </ul>
         {% endif %}
