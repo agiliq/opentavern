@@ -11,7 +11,7 @@ from django.views.generic import DetailView, CreateView, UpdateView
 
 from guardian.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
-from .models import TavernGroup, Member, Event, Attendee
+from .models import TavernGroup, Membership, Event, Attendee
 from .forms import CreateGroupForm, CreateEventForm
 
 
@@ -23,10 +23,9 @@ def today_date():
 
 def index(request, template='home.html'):
     """ index page """
+    all_groups = TavernGroup.objects.all()
     if request.user.is_authenticated():
-        groups = request.user.tavern_groups.all()
-        joined_groups = [group.tavern_group for group in groups]
-        all_groups = TavernGroup.objects.all()
+        joined_groups = request.user.tavern_groups.all()
         unjoined_groups = list(set(all_groups) - set(joined_groups))
         upcoming_events = Event.objects.filter(starts_at__gt=today_date())
         events = Attendee.objects.filter(user_id=request.user.id)
@@ -37,8 +36,7 @@ def index(request, template='home.html'):
                    'upcoming_events': upcoming_events,
                    'events_rsvped': events_rsvped}
     else:
-        joined_groups = TavernGroup.objects.all()
-        context = {'joined_groups': joined_groups}
+        context = {'groups': all_groups}
     return render(request, template, context)
 
 
@@ -63,18 +61,18 @@ class GroupDetail(UpcomingEventsMixin, DetailView):
 
         tavern_group = context['group']
         try:
-            Member.objects.get(tavern_group=tavern_group,
+            Membership.objects.get(tavern_group=tavern_group,
                                user=self.request.user.id)
             user_is_member = True
-        except Member.DoesNotExist:
+        except Membership.DoesNotExist:
             user_is_member = False
         context['user_is_member'] = user_is_member
 
         # Raise 404 when there are no members in that group. TODO: is 404 it needed?
         try:
-            recent_group_members = Member.objects.filter(
+            recent_group_members = Membership.objects.filter(
                 tavern_group=tavern_group).order_by('-join_date')[:5]
-        except Member.DoesNotExist:
+        except Membership.DoesNotExist:
             raise Http404
         context["recent_group_members"] = recent_group_members
 
@@ -93,11 +91,11 @@ def tavern_toggle_member(request):
     user = get_object_or_404(User, id=request.POST.get('user_id'))
     group = get_object_or_404(TavernGroup, slug=request.POST.get('slug'))
     try:
-        member = Member.objects.get(user=user, tavern_group=group)
+        member = Membership.objects.get(user=user, tavern_group=group)
         response = "Join Group"
         member.delete()
-    except Member.DoesNotExist:
-        member = Member.objects.create(
+    except Membership.DoesNotExist:
+        member = Membership.objects.create(
             user=user,
             tavern_group=group,
             join_date=today_date())
@@ -153,7 +151,7 @@ class GroupCreate(LoginRequiredMixin, CreateView):
 create_group = GroupCreate.as_view()
 
 
-class GroupUpdate(PermissionRequiredMixin, UpdateView):
+class GroupUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = TavernGroup
     form_class = CreateGroupForm
     template_name = 'tavern_group_update.html'
@@ -169,6 +167,11 @@ class EventCreate(LoginRequiredMixin, CreateView):
     model = Event
     template_name = "create_event.html"
 
+    def get_form_kwargs(self):
+        kwargs = super(EventCreate, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def form_valid(self, form):
         form.instance.creator = self.request.user
         return super(EventCreate, self).form_valid(form)
@@ -177,7 +180,7 @@ class EventCreate(LoginRequiredMixin, CreateView):
 create_event = EventCreate.as_view()
 
 
-class EventUpdate(PermissionRequiredMixin, UpdateView):
+class EventUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Event
     form_class = CreateEventForm
     template_name = 'tavern_event_update.html'

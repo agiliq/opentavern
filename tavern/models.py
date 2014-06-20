@@ -23,7 +23,8 @@ class TavernGroup(models.Model):
     country = models.CharField(max_length=20)
     city = models.CharField(max_length=20)
     creator = models.ForeignKey(User, related_name="created_groups")
-    organizers = models.ManyToManyField(User)
+    organizers = models.ManyToManyField(User, related_name="organizes_groups")
+    members = models.ManyToManyField(User, through="Membership", related_name="tavern_groups")
     slug = models.SlugField(max_length=50)
 
     def get_absolute_url(self):
@@ -32,7 +33,7 @@ class TavernGroup(models.Model):
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
         super(TavernGroup, self).save(*args, **kwargs)
-        Member.objects.get_or_create(
+        Membership.objects.get_or_create(
             user=self.creator,
             tavern_group=self,
             defaults={'join_date': timezone.now().isoformat()})
@@ -41,10 +42,10 @@ class TavernGroup(models.Model):
         return "%s" % self.name
 
 
-class Member(models.Model):
+class Membership(models.Model):
     "People who are in a TavernGroup"
-    user = models.ForeignKey(User, related_name='tavern_groups')
-    tavern_group = models.ForeignKey(TavernGroup, related_name='members')
+    user = models.ForeignKey(User, related_name='tgroup_memberships')
+    tavern_group = models.ForeignKey(TavernGroup, related_name='memberships')
     join_date = models.DateTimeField()
 
     def __unicode__(self):
@@ -76,10 +77,9 @@ class Event(models.Model):
         # Old check: if event creator is member of that group
         # but it should display only those groups which the user is member of and then
         # check in form validation and return error
-        member = Member.objects.get(user=self.creator, tavern_group=self.group)
+        member = Membership.objects.get(user=self.creator, tavern_group=self.group)
         Attendee.objects.get_or_create(
             user=self.creator,
-            member=member,
             event=self,
             defaults={'rsvped_on': timezone.now().isoformat(),
                       'rsvp_status': 'yes'})
@@ -94,7 +94,6 @@ RSVP_CHOICES = (('yes', 'Yes'), ('no', 'No'), ('maybe', 'May Be'))
 class Attendee(models.Model):
     "People who have RSVPed to events"
     user = models.ForeignKey(User)
-    member = models.ForeignKey(Member)
     event = models.ForeignKey(Event)
     rsvped_on = models.DateTimeField()
     rsvp_status = models.CharField(verbose_name="RSVP Status",

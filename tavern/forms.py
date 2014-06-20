@@ -10,7 +10,7 @@ class CreateGroupForm(forms.ModelForm):
     """ CreateGroupForm """
     class Meta:
         model = TavernGroup
-        exclude = ['creator', 'organizers', 'slug']
+        exclude = ['creator', 'organizers', 'members', 'slug']
 
 
 class CreateEventForm(forms.ModelForm):
@@ -20,6 +20,11 @@ class CreateEventForm(forms.ModelForm):
     class Meta:
         model = Event
         exclude = ['creator', 'slug', 'starts_at', 'ends_at']
+
+    def __init__(self, *args, **kwargs):
+            self.user = kwargs.pop('user', None)
+            super(CreateEventForm, self).__init__(*args, **kwargs)
+            self.fields['group'].queryset = self.user.tavern_groups.all()
 
     def save(self, commit=True):
         event = super(CreateEventForm, self).save(commit=False)

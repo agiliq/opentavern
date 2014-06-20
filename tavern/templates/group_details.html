@@ -2,13 +2,15 @@
 
 {% block content %}
     <h1> Group Name: {{ group.name }} </h1>
-    <button id="is_member" type="button" onclick="toggle_member('{{ user.id }}', '{{ group.slug }}')">
-        {% if user_is_member %}
-            Unjoin group
-        {% else %}
-            Join group
-        {% endif %}
-    </button>
+    {% if user.is_authenticated %}
+      <button id="is_member" type="button" onclick="toggle_member('{{ user.id }}', '{{ group.slug }}')">
+          {% if user_is_member %}
+              Unjoin group
+          {% else %}
+              Join group
+          {% endif %}
+      </button>
+    {% endif %}
     <h1> Recently Joined: {{ user.name }} </h1>
     <ul>
     {% for member in recent_group_members %}
