@@ -14,11 +14,50 @@
 
     <h3>Event created by: {{ event.creator }} </h3>
     {% if user.is_authenticated %}
-    <div class="btn-group">
-        <button type="button" onclick="change_rsvp('{{ event.id }}', 'yes')" id="rsvp-yes" class="rsvp btn btn-default">Yes</button>
-        <button type="button" onclick="change_rsvp('{{ event.id }}', 'no')" id="rsvp-no" class="rsvp btn btn-default">No</button>
-        <button type="button" onclick="change_rsvp('{{ event.id }}', 'maybe')" id="rsvp-maybe" class="rsvp btn btn-default">May be</button>
+    <h3>RSVP</h3>
+    <p id="rsvpMessage">{{ attendee_rsvp }}</p>
+    <div id="changeRsvpModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">rsvp</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="btn-group">
+                        <button type="button" onclick="change_rsvp('{{ event.id }}', 'yes')" id="rsvp-yes" class="rsvp btn btn-default">Yes</button>
+                        <button type="button" onclick="change_rsvp('{{ event.id }}', 'no')" id="rsvp-no" class="rsvp btn btn-default">No</button>
+                        <button type="button" onclick="change_rsvp('{{ event.id }}', 'maybe')" id="rsvp-maybe" class="rsvp btn btn-default">May be</button>
+                    </div>
+                </div>
+                <div class="modal-footer"></div>
+            </div>
+        </div>
     </div>
+    <button class="btn btn-default" id="rsvpButton" data-toggle="modal" data-target="#changeRsvpModal">{% if attendee %}Change{% else %}Add{% endif %} rsvp</button>
+
+    {% if attendee %}
+    <div id="deleteRsvpModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Are you sure?</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="{% url 'delete_rsvp' attendee.pk %}" method="POST">
+                        {% csrf_token %}
+                        <button class="btn btn-default" type="submit">Yes</button>
+                        <button class="btn btn-default" type="button" class="close" data-dismiss="modal">No</button>
+                    </form>
+                </div>
+                <div class="modal-footer"></div>
+            </div>
+        </div>
+    </div>
+    <button class="btn btn-danger" data-toggle="modal" data-target="#deleteRsvpModal">Remove my rsvp</button>
+    {% endif %}
+
     {% endif %}
     <hr/>
     <h1> Event Attendees </h1>
@@ -41,6 +80,9 @@
             $.get(url, function(data) {
                     $(".rsvp").removeClass("active");
                     $("#rsvp-"+rsvp).addClass("active");
+                    $("#rsvpMessage").html(data);
+                    $("#rsvpButton").html("Change rsvp");
+                    $("#changeRsvpModal").modal('hide');
                     });
         }
     </script>

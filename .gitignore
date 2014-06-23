@@ -6,6 +6,7 @@
 *pydev*
 .project
 *.tmp*~
+*.DS_Store
 *CACHE*
 db.sqlite3
 media/
