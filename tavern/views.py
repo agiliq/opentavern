@@ -40,19 +40,29 @@ def index(request, template='home.html'):
 @login_required
 def rsvp(request, event_id, rsvp_status):
     """ View to set RSVP status for an event """
-    attendee = Attendee.objects.get_or_create(user__id=request.user.id,
-                                              event__id=event_id)[0]
-    attendee.rsvp_status = rsvp_status
-    attendee.rsvped_on = timezone.now()
-    attendee.save()
+    #import pdb
+    #pdb.set_trace()
+    event = get_object_or_404(Event, id=int(event_id))
+    user = get_object_or_404(User, id=request.user.id)
+    try:
+        attendee = Attendee.objects.get(user=user,
+                                        event=event)
+        attendee.rsvp_status = rsvp_status
+        attendee.rsvped_on = timezone.now()
+        attendee.save()
+    except Attendee.DoesNotExist:
+        attendee = Attendee.objects.create(
+                user=user,
+                event=event,
+                rsvp_status=rsvp_status,
+                rsvped_on=timezone.now())
 
-    message = 'Successfully Chaged your RSVP status. '
     if rsvp_status == 'yes':
-        message += "You are attending this event."
+        message = "You are attending this event."
     elif rsvp_status == 'no':
-        message += "You are not attending this event."
+        message = "You are not attending this event."
     elif rsvp_status == 'maybe':
-        message += "You may attend this event."
+        message = "You may attend this event."
 
     return HttpResponse(message) #Response message not used for now
 
@@ -120,8 +130,23 @@ class EventDetail(UpcomingEventsMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(EventDetail, self).get_context_data(**kwargs)
         event = context['event']
+        #if self.request.user.is_authenticated:
+        try:
+            rsvp_status = Attendee.objects.get(user__id=self.request.user.id,
+                                            event=event).rsvp_status
+            if rsvp_status == 'yes':
+                message = "You are attending this event."
+            elif rsvp_status == 'no':
+                message = "You are not attending this event."
+            elif rsvp_status == 'maybe':
+                message = "You may attend this event."
+        except Attendee.DoesNotExist:
+            message = "You have not rsvped yet"
+        context['attendee_rsvp'] = message
 
-        context['event_attendees'] = Attendee.objects.filter(event=event, rsvp_status="yes")
+        context['event_attendees'] = Attendee.objects.filter(
+                event=event,
+                rsvp_status="yes")
         context['editable'] = event.starts_at > timezone.now()
         return context
 
