@@ -19,7 +19,7 @@ class CreateEventForm(forms.ModelForm):
 
     class Meta:
         model = Event
-        exclude = ['creator', 'slug', 'starts_at', 'ends_at']
+        exclude = ['creator', 'slug', 'starts_at', 'ends_at', 'show']
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
@@ -28,6 +28,26 @@ class CreateEventForm(forms.ModelForm):
 
     def save(self, commit=True):
         event = super(CreateEventForm, self).save(commit=False)
+        event_time = self.cleaned_data['event_time'].split(" - ")
+        start_time = datetime.strptime(event_time[0], '%d/%m/%Y %I:%M %p')
+        end_time = datetime.strptime(event_time[1], '%d/%m/%Y %I:%M %p')
+        event.starts_at = start_time
+        event.ends_at = end_time
+        if commit:
+            event.save()
+        return event
+
+
+class UpdateEventForm(forms.ModelForm):
+    """ Change Event Details """
+    event_time = forms.CharField(max_length=50, required=True)
+
+    class Meta:
+        model = Event
+        exclude = ['group', 'creator', 'slug', 'starts_at', 'ends_at', 'show']
+
+    def save(self, commit=True):
+        event = super(UpdatEventForm, self).save(commit=False)
         event_time = self.cleaned_data['event_time'].split(" - ")
         start_time = datetime.strptime(event_time[0], '%d/%m/%Y %I:%M %p')
         end_time = datetime.strptime(event_time[1], '%d/%m/%Y %I:%M %p')

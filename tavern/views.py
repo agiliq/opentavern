@@ -12,7 +12,7 @@ from django.views.generic import CreateView, UpdateView, DeleteView
 from guardian.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
 from .models import TavernGroup, Membership, Event, Attendee
-from .forms import CreateGroupForm, CreateEventForm
+from .forms import CreateGroupForm, CreateEventForm, UpdateEventForm
 
 
 def today_date():
@@ -194,11 +194,15 @@ class EventCreate(LoginRequiredMixin, CreateView):
 class EventUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     """ Update an Event """
     model = Event
-    form_class = CreateEventForm
+    form_class = UpdateEventForm
     template_name = 'tavern_event_update.html'
     permission_required = 'tavern.change_event'
     render_403 = True
     return_403 = True
+
+    def form_valid(self, form):
+        form.instance.creator = self.request.user
+        return super(EventUpdate, self).form_valid(form)
 
 
 class RsvpDelete(LoginRequiredMixin, DeleteView):

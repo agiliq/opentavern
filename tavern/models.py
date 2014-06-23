@@ -67,6 +67,7 @@ class Event(models.Model):
     slug = models.SlugField(max_length=250)
 
     creator = models.ForeignKey(User)
+    show = models.BooleanField(default=True)
 
     class Meta:
         unique_together = ('group', 'name')
@@ -80,7 +81,6 @@ class Event(models.Model):
         # Old check: if event creator is member of that group
         # but it should display only those groups which the user is member of and then
         # check in form validation and return error
-        member = Membership.objects.get(user=self.creator, tavern_group=self.group)
         Attendee.objects.get_or_create(
             user=self.creator,
             event=self,
@@ -113,12 +113,23 @@ def create_event_permission(sender, instance, created, **kwargs):
     if created:
         assign_perm('change_event', instance.creator, instance)
         assign_perm('delete_event', instance.creator, instance)
+    # Assign permissions to creator of the group
+        assign_perm('change_event', instance.group.creator, instance)
+        assign_perm('delete_event', instance.group.creator, instance)
+    # Assign permissions to all organizers of group
+    for user in instance.group.organizers.all():
+        assign_perm('change_event', user, instance)
+        assign_perm('delete_event', user, instance)
 
 
 def create_group_permission(sender, instance, created, **kwargs):
     if created:
         assign_perm('change_taverngroup', instance.creator, instance)
         assign_perm('delete_taverngroup', instance.creator, instance)
+    # Assign permissions to all organizers of group
+    for user in instance.organizers.all():
+        assign_perm('change_event', user, instance)
+        assign_perm('delete_event', user, instance)
 
 
 def delete_orphaned_permissions(sender, instance, **kwargs):
