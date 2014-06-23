@@ -1,11 +1,13 @@
 # pylint: disable=method-hidden
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from guardian.shortcuts import assign_perm
+from guardian.models import UserObjectPermission
 
 from .slugify import unique_slugify
 
@@ -106,15 +108,26 @@ class Attendee(models.Model):
     def __unicode__(self):
         return "%s - %s" % (self.user.first_name, self.event.name)
 
+
 def create_event_permission(sender, instance, created, **kwargs):
     if created:
         assign_perm('change_event', instance.creator, instance)
         assign_perm('delete_event', instance.creator, instance)
+
 
 def create_group_permission(sender, instance, created, **kwargs):
     if created:
         assign_perm('change_taverngroup', instance.creator, instance)
         assign_perm('delete_taverngroup', instance.creator, instance)
 
+
+def delete_orphaned_permissions(sender, instance, **kwargs):
+    UserObjectPermission.objects.filter(
+            user=instance.creator,
+            content_type=ContentType.objects.get_for_model(instance),
+            object_pk=instance.pk).delete()
+
 post_save.connect(create_event_permission, sender=Event)
 post_save.connect(create_group_permission, sender=TavernGroup)
+pre_delete.connect(delete_orphaned_permissions, sender=Event)
+pre_delete.connect(delete_orphaned_permissions, sender=TavernGroup)

@@ -39,11 +39,10 @@ def index(request, template='home.html'):
         context = {'groups': all_groups}
     return render(request, template, context)
 
+
 @login_required
 def rsvp(request, event_id, rsvp_status):
     """ View to set RSVP status for an event """
-    #import pdb
-    #pdb.set_trace()
     event = get_object_or_404(Event, id=int(event_id))
     user = get_object_or_404(User, id=request.user.id)
     try:
@@ -57,7 +56,8 @@ def rsvp(request, event_id, rsvp_status):
                 user=user,
                 event=event,
                 rsvp_status=rsvp_status,
-                rsvped_on=timezone.now())
+                rsvped_on=timezone.now()
+        )
 
     if rsvp_status == 'yes':
         message = "You are attending this event."
@@ -67,6 +67,7 @@ def rsvp(request, event_id, rsvp_status):
         message = "You may attend this event."
 
     return HttpResponse(message)
+
 
 @login_required
 def tavern_toggle_member(request):
@@ -111,7 +112,7 @@ class GroupDetail(UpcomingEventsMixin, DetailView):
         tavern_group = context['group']
         try:
             Membership.objects.get(tavern_group=tavern_group,
-                               user=self.request.user.id)
+                                   user=self.request.user.id)
             user_is_member = True
         except Membership.DoesNotExist:
             user_is_member = False
@@ -132,7 +133,6 @@ class EventDetail(UpcomingEventsMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(EventDetail, self).get_context_data(**kwargs)
         event = context['event']
-        #if self.request.user.is_authenticated:
         try:
             attendee = Attendee.objects.get(user__id=self.request.user.id,
                                             event=event)
@@ -148,8 +148,8 @@ class EventDetail(UpcomingEventsMixin, DetailView):
         context['attendee_rsvp'] = message
 
         context['event_attendees'] = Attendee.objects.filter(
-                event=event,
-                rsvp_status="yes")
+                        event=event,
+                        rsvp_status="yes")
         context['editable'] = event.starts_at > timezone.now()
         return context
 
@@ -204,11 +204,9 @@ class EventUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 class RsvpDelete(LoginRequiredMixin, DeleteView):
     """ Remove a RSVP"""
     model = Attendee
-    #success_url = "/"
 
     def get_success_url(self, **kwargs):
-        return reverse("tavern_event_details", kwargs={"slug":self.object.event.slug})
-
+        return reverse("tavern_event_details", kwargs={"slug": self.object.event.slug})
 
 
 tavern_group_update = GroupUpdate.as_view()

@@ -8,20 +8,6 @@ from datetime import datetime, timedelta
 
 class TestModels(TestCase):
 
-    def test_tavern_group_unique_slug(self):
-        """Test that unique slugs are generated for
-        groups with same name"""
-        creator = create_and_get_user()
-        group = create_and_get_tavern_group(creator=creator)
-        self.assertEqual(group.slug, 'testgroup')
-        group2 = create_and_get_tavern_group(creator=creator)
-        self.assertEqual(group2.slug, 'testgroup-2')
-        group3 = create_and_get_tavern_group(creator=creator)
-        self.assertEqual(group3.slug, 'testgroup-3')
-        group3.delete()
-        group3 = create_and_get_tavern_group(creator=creator)
-        self.assertEqual(group3.slug, 'testgroup-3')
-
     def test_tavern_group_save(self):
         """When a TavernGroup is saved, we want to make sure
         an instance of Membership which associates the creator
@@ -30,7 +16,7 @@ class TestModels(TestCase):
         tavern_group = create_and_get_tavern_group(creator=creator)
         self.assertEqual(TavernGroup.objects.count(), 1)
         self.assertEqual(Membership.objects.count(), 1)
-        #Change an attribute of tavern_group
+        # Change an attribute of tavern_group
         tavern_group.description = 'Changed description'
         tavern_group.save()
         self.assertEqual(TavernGroup.objects.count(), 1)
@@ -63,8 +49,8 @@ class TestViews(TestCase):
         self.client = Client()
         self.client.login(username="test", password="test")
 
-    #def test_today_date(self):
-        #self.assertEqual(today_date(), timezone.now().isoformat())
+    # def test_today_date(self):
+        # self.assertEqual(today_date(), timezone.now().isoformat())
 
     def test_index(self):
         response = self.client.get("/")
@@ -134,7 +120,7 @@ class TestViews(TestCase):
         user = User.objects.create_user(username='test2',
                                         email='test2@agiliq.com',
                                         password='test2')
-        group = create_and_get_tavern_group(user)
+        group = create_and_get_tavern_group(user, name='group2')
         response = self.client.post(
             '/tavern_toggle_member/',
             {'user_id': self.user.id,
@@ -148,8 +134,10 @@ def create_and_get_user():
                                     password='test')
 
 
-def create_and_get_tavern_group(creator, organizers=None):
-    group = TavernGroup(name='TestGroup',
+def create_and_get_tavern_group(creator, name=None, organizers=None):
+    if not name:
+        name = 'TestGroup'
+    group = TavernGroup(name=name,
                         description='A group for testing',
                         creator=creator)
     group.save()
