@@ -16,7 +16,7 @@
     {% if user.is_authenticated %}
     <h3>RSVP</h3>
     <p id="rsvpMessage">{{ attendee_rsvp }}</p>
-    <div id="rsvpModal" class="modal fade" tabindex="-1" role="dialog">
+    <div id="changeRsvpModal" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -34,7 +34,30 @@
             </div>
         </div>
     </div>
-    <button class="btn btn-default" data-toggle="modal" data-target="#rsvpModal">Change rsvp</button>
+    <button class="btn btn-default" id="rsvpButton" data-toggle="modal" data-target="#changeRsvpModal">{% if attendee %}Change{% else %}Add{% endif %} rsvp</button>
+
+    {% if attendee %}
+    <div id="deleteRsvpModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Are you sure?</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="{% url 'delete_rsvp' attendee.pk %}" method="POST">
+                        {% csrf_token %}
+                        <button class="btn btn-default" type="submit">Yes</button>
+                        <button class="btn btn-default" type="button" class="close" data-dismiss="modal">No</button>
+                    </form>
+                </div>
+                <div class="modal-footer"></div>
+            </div>
+        </div>
+    </div>
+    <button class="btn btn-danger" data-toggle="modal" data-target="#deleteRsvpModal">Remove my rsvp</button>
+    {% endif %}
+
     {% endif %}
     <hr/>
     <h1> Event Attendees </h1>
@@ -58,7 +81,8 @@
                     $(".rsvp").removeClass("active");
                     $("#rsvp-"+rsvp).addClass("active");
                     $("#rsvpMessage").html(data);
-                    $("#rsvpModal").modal('hide');
+                    $("#rsvpButton").html("Change rsvp");
+                    $("#changeRsvpModal").modal('hide');
                     });
         }
     </script>

@@ -2,10 +2,12 @@
 from django.utils import timezone
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, get_list_or_404
-from django.views.generic import DetailView, CreateView, UpdateView
+from django.views.generic import DetailView
+from django.views.generic import CreateView, UpdateView, DeleteView
 
 from guardian.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
@@ -64,7 +66,7 @@ def rsvp(request, event_id, rsvp_status):
     elif rsvp_status == 'maybe':
         message = "You may attend this event."
 
-    return HttpResponse(message) #Response message not used for now
+    return HttpResponse(message)
 
 @login_required
 def tavern_toggle_member(request):
@@ -132,14 +134,15 @@ class EventDetail(UpcomingEventsMixin, DetailView):
         event = context['event']
         #if self.request.user.is_authenticated:
         try:
-            rsvp_status = Attendee.objects.get(user__id=self.request.user.id,
-                                            event=event).rsvp_status
-            if rsvp_status == 'yes':
+            attendee = Attendee.objects.get(user__id=self.request.user.id,
+                                            event=event)
+            if attendee.rsvp_status == 'yes':
                 message = "You are attending this event."
-            elif rsvp_status == 'no':
+            elif attendee.rsvp_status == 'no':
                 message = "You are not attending this event."
-            elif rsvp_status == 'maybe':
+            elif attendee.rsvp_status == 'maybe':
                 message = "You may attend this event."
+            context['attendee'] = attendee
         except Attendee.DoesNotExist:
             message = "You have not rsvped yet"
         context['attendee_rsvp'] = message
@@ -198,9 +201,20 @@ class EventUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     return_403 = True
 
 
+class RsvpDelete(LoginRequiredMixin, DeleteView):
+    """ Remove a RSVP"""
+    model = Attendee
+    #success_url = "/"
+
+    def get_success_url(self, **kwargs):
+        return reverse("tavern_event_details", kwargs={"slug":self.object.event.slug})
+
+
+
 tavern_group_update = GroupUpdate.as_view()
 tavern_event_update = EventUpdate.as_view()
 create_group = GroupCreate.as_view()
 create_event = EventCreate.as_view()
 event_details = EventDetail.as_view()
 group_details = GroupDetail.as_view()
+delete_rsvp = RsvpDelete.as_view()

@@ -22,4 +22,6 @@ urlpatterns = patterns('',
                            name='tavern_toggle_member'),
                        url(r'^rsvp/(?P<event_id>\d+)/(?P<rsvp_status>\w+)/',
                            views.rsvp, name='change_rsvp'),
+                       url(r'^rsvp_delete/(?P<pk>\d+)/',
+                           views.delete_rsvp, name='delete_rsvp'),
                        )
