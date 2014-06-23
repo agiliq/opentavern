@@ -6,7 +6,7 @@ As an anonymous user
          - The homepage should list upcoming events
 
 
-As an logged in user
+As a logged in user
 ---------------------
 
     - I should be able to view the homepage
