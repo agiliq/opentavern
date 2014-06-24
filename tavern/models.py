@@ -5,10 +5,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 
-from django.db.models.signals import post_save, pre_delete
-from guardian.shortcuts import assign_perm
-from guardian.models import UserObjectPermission
-
 from .slugify import unique_slugify
 
 
@@ -55,6 +51,14 @@ class Membership(models.Model):
         return "%s - %s" % (self.user.username, self.tavern_group.name)
 
 
+class EventShowManager(models.Manager):
+    user_for_related_fields = True
+
+    def get_queryset(self):
+        return super(EventShowManager, self).get_queryset().filter(
+                show=True)
+
+
 class Event(models.Model):
     "Event you can attend"
     group = models.ForeignKey(TavernGroup)
@@ -69,8 +73,12 @@ class Event(models.Model):
     creator = models.ForeignKey(User)
     show = models.BooleanField(default=True)
 
+    default = models.Manager()
+    objects = EventShowManager()
+
     class Meta:
         unique_together = ('group', 'name')
+        ordering = ['starts_at']
 
     def get_absolute_url(self):
         return reverse("tavern_event_details", kwargs={"slug": self.slug})
@@ -107,38 +115,3 @@ class Attendee(models.Model):
 
     def __unicode__(self):
         return "%s - %s" % (self.user.first_name, self.event.name)
-
-
-def create_event_permission(sender, instance, created, **kwargs):
-    if created:
-        assign_perm('change_event', instance.creator, instance)
-        assign_perm('delete_event', instance.creator, instance)
-    # Assign permissions to creator of the group
-        assign_perm('change_event', instance.group.creator, instance)
-        assign_perm('delete_event', instance.group.creator, instance)
-    # Assign permissions to all organizers of group
-    for user in instance.group.organizers.all():
-        assign_perm('change_event', user, instance)
-        assign_perm('delete_event', user, instance)
-
-
-def create_group_permission(sender, instance, created, **kwargs):
-    if created:
-        assign_perm('change_taverngroup', instance.creator, instance)
-        assign_perm('delete_taverngroup', instance.creator, instance)
-    # Assign permissions to all organizers of group
-    for user in instance.organizers.all():
-        assign_perm('change_event', user, instance)
-        assign_perm('delete_event', user, instance)
-
-
-def delete_orphaned_permissions(sender, instance, **kwargs):
-    UserObjectPermission.objects.filter(
-            user=instance.creator,
-            content_type=ContentType.objects.get_for_model(instance),
-            object_pk=instance.pk).delete()
-
-post_save.connect(create_event_permission, sender=Event)
-post_save.connect(create_group_permission, sender=TavernGroup)
-pre_delete.connect(delete_orphaned_permissions, sender=Event)
-pre_delete.connect(delete_orphaned_permissions, sender=TavernGroup)

@@ -130,6 +130,9 @@ class EventDetail(UpcomingEventsMixin, DetailView):
     context_object_name = "event"
     model = Event
 
+    def get_queryset(self, **kwargs):
+        return self.model.objects.all()
+
     def get_context_data(self, **kwargs):
         context = super(EventDetail, self).get_context_data(**kwargs)
         event = context['event']
