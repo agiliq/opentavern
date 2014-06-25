@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'accounts',
     'south',
     'guardian',
+    'bootstrap3_datetime',
 
     'allauth',
     'allauth.account',
@@ -149,6 +150,8 @@ SOCIALACCOUNT_PROVIDERS = {
 
 # Guardian specific configuration
 ANONYMOUS_USER_ID = -1
+
+GUARDIAN_RENDER_403 = True
 
 
 if 'heroku_env' in os.environ:

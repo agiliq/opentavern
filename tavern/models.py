@@ -1,15 +1,17 @@
 # pylint: disable=method-hidden
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 
-from django.db.models.signals import post_save, pre_delete
-from guardian.shortcuts import assign_perm
-from guardian.models import UserObjectPermission
-
 from .slugify import unique_slugify
+
+
+class NonEmptyGroupManager(models.Manager):
+    user_for_related_fields = True
+
+    def get_queryset(self):
+        return super(NonEmptyGroupManager, self).get_queryset().exclude(members=None)
 
 
 class TavernGroup(models.Model):
@@ -25,10 +27,17 @@ class TavernGroup(models.Model):
                                     blank=True)
     country = models.CharField(max_length=20)
     city = models.CharField(max_length=20)
-    creator = models.ForeignKey(User, related_name="created_groups")
-    organizers = models.ManyToManyField(User, related_name="organizes_groups")
-    members = models.ManyToManyField(User, through="Membership", related_name="tavern_groups")
+    creator = models.ForeignKey(User,
+                                related_name="created_groups")
+    organizers = models.ManyToManyField(User,
+                                        related_name="organizes_groups")
+    members = models.ManyToManyField(User,
+                                     through="Membership",
+                                     related_name="tavern_groups")
     slug = models.SlugField(max_length=50)
+
+    default = models.Manager()
+    objects = NonEmptyGroupManager()
 
     def get_absolute_url(self):
         return reverse("tavern_group_details", kwargs={"slug": self.slug})
@@ -47,12 +56,21 @@ class TavernGroup(models.Model):
 
 class Membership(models.Model):
     "People who are in a TavernGroup"
-    user = models.ForeignKey(User, related_name='tgroup_memberships')
-    tavern_group = models.ForeignKey(TavernGroup, related_name='memberships')
+    user = models.ForeignKey(User,
+                             related_name='tgroup_memberships')
+    tavern_group = models.ForeignKey(TavernGroup,
+                                     related_name='memberships')
     join_date = models.DateTimeField()
 
     def __unicode__(self):
         return "%s - %s" % (self.user.username, self.tavern_group.name)
+
+
+class EventShowManager(models.Manager):
+    user_for_related_fields = True
+
+    def get_queryset(self):
+        return super(EventShowManager, self).get_queryset().filter(show=True)
 
 
 class Event(models.Model):
@@ -67,9 +85,14 @@ class Event(models.Model):
     slug = models.SlugField(max_length=250)
 
     creator = models.ForeignKey(User)
+    show = models.BooleanField(default=True)
+
+    default = models.Manager()
+    objects = EventShowManager()
 
     class Meta:
         unique_together = ('group', 'name')
+        ordering = ['starts_at']
 
     def get_absolute_url(self):
         return reverse("tavern_event_details", kwargs={"slug": self.slug})
@@ -80,7 +103,6 @@ class Event(models.Model):
         # Old check: if event creator is member of that group
         # but it should display only those groups which the user is member of and then
         # check in form validation and return error
-        member = Membership.objects.get(user=self.creator, tavern_group=self.group)
         Attendee.objects.get_or_create(
             user=self.creator,
             event=self,
@@ -107,27 +129,3 @@ class Attendee(models.Model):
 
     def __unicode__(self):
         return "%s - %s" % (self.user.first_name, self.event.name)
-
-
-def create_event_permission(sender, instance, created, **kwargs):
-    if created:
-        assign_perm('change_event', instance.creator, instance)
-        assign_perm('delete_event', instance.creator, instance)
-
-
-def create_group_permission(sender, instance, created, **kwargs):
-    if created:
-        assign_perm('change_taverngroup', instance.creator, instance)
-        assign_perm('delete_taverngroup', instance.creator, instance)
-
-
-def delete_orphaned_permissions(sender, instance, **kwargs):
-    UserObjectPermission.objects.filter(
-            user=instance.creator,
-            content_type=ContentType.objects.get_for_model(instance),
-            object_pk=instance.pk).delete()
-
-post_save.connect(create_event_permission, sender=Event)
-post_save.connect(create_group_permission, sender=TavernGroup)
-pre_delete.connect(delete_orphaned_permissions, sender=Event)
-pre_delete.connect(delete_orphaned_permissions, sender=TavernGroup)

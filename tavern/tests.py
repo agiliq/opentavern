@@ -67,7 +67,8 @@ class TestViews(TestCase):
         group = create_and_get_tavern_group(creator)
         response = self.client.post(
             "/create_event/",
-            {'event_time': u'16/05/2014 12:00 AM - 16/05/2014 12:00 AM',
+            {'starts_at': u'2014-06-25 12:00',
+             'ends_at': u'2014-06-25 14:00',
              'group': group.id,
              'name': 'Test',
              'description': 'Test Event',
@@ -95,18 +96,18 @@ class TestViews(TestCase):
     def test_group_details(self):
         creator = self.user
         group = create_and_get_tavern_group(creator)
-        response = self.client.get('/groups/%s' % group.slug)
+        response = self.client.get('/groups/%s/' % group.slug)
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get('/groups/%s' % 'Incorrect_Slug')
+        response = self.client.get('/groups/%s/' % 'Incorrect_Slug')
         self.assertEqual(response.status_code, 404)
 
     def test_event_details(self):
         event = create_and_get_event(self.user)
-        response = self.client.get('/events/%s' % event.slug)
+        response = self.client.get('/events/%s/' % event.slug)
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get('/events/%s' % 'incorrect_slug')
+        response = self.client.get('/events/%s/' % 'incorrect_slug')
         self.assertEqual(response.status_code, 404)
 
     def test_tavern_toggle_member(self):
