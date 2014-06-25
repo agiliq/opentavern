@@ -1,9 +1,7 @@
-from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import pre_save, post_save, pre_delete, m2m_changed
 from django.contrib.auth.models import User
 
 from guardian.shortcuts import assign_perm, remove_perm
-from guardian.models import UserObjectPermission
 
 from .models import TavernGroup, Event
 
@@ -24,6 +22,7 @@ def group_pre_save(sender, instance, **kwargs):
         instance._old_m2m = set(list(instance.organizers.values_list('pk', flat=True)))
     else:
         instance._old_m2m = set(list())
+
 
 def create_group_permission_for_organizers(sender, instance, action, reverse, pk_set, *args, **kwargs):
     # Assign permissions to all organizers of group

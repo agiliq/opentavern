@@ -52,12 +52,10 @@ def rsvp(request, event_id, rsvp_status):
         attendee.rsvped_on = timezone.now()
         attendee.save()
     except Attendee.DoesNotExist:
-        attendee = Attendee.objects.create(
-                user=user,
-                event=event,
-                rsvp_status=rsvp_status,
-                rsvped_on=timezone.now()
-        )
+        attendee = Attendee.objects.create(user=user,
+                                           event=event,
+                                           rsvp_status=rsvp_status,
+                                           rsvped_on=timezone.now())
 
     if rsvp_status == 'yes':
         message = "You are attending this event."
@@ -150,9 +148,8 @@ class EventDetail(UpcomingEventsMixin, DetailView):
             message = "You have not rsvped yet"
         context['attendee_rsvp'] = message
 
-        context['event_attendees'] = Attendee.objects.filter(
-                        event=event,
-                        rsvp_status="yes")
+        context['event_attendees'] = Attendee.objects.filter(event=event,
+                                                             rsvp_status="yes")
         context['editable'] = event.starts_at > timezone.now()
         return context
 

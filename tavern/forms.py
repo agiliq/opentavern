@@ -1,7 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from datetime import datetime
 
 from .models import TavernGroup, Event, Membership
 from bootstrap3_datetime.widgets import DateTimePicker
@@ -25,8 +24,8 @@ class CreateEventForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
         super(CreateEventForm, self).__init__(*args, **kwargs)
         self.fields['group'].queryset = self.user.tavern_groups.all()
-        self.fields['starts_at'].widget = DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",})
-        self.fields['ends_at'].widget = DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",})
+        self.fields['starts_at'].widget = DateTimePicker(options={"format": "YYYY-MM-DD HH:mm", })
+        self.fields['ends_at'].widget = DateTimePicker(options={"format": "YYYY-MM-DD HH:mm", })
 
     def clean(self):
         cleaned_data = super(CreateEventForm, self).clean()
@@ -47,8 +46,8 @@ class UpdateEventForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(UpdateEventForm, self).__init__(*args, **kwargs)
-        self.fields['starts_at'].widget = DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",})
-        self.fields['ends_at'].widget = DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",})
+        self.fields['starts_at'].widget = DateTimePicker(options={"format": "YYYY-MM-DD HH:mm", })
+        self.fields['ends_at'].widget = DateTimePicker(options={"format": "YYYY-MM-DD HH:mm", })
 
 
 class UserCreateForm(UserCreationForm):

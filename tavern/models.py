@@ -6,12 +6,12 @@ from django.core.urlresolvers import reverse
 
 from .slugify import unique_slugify
 
+
 class NonEmptyGroupManager(models.Manager):
     user_for_related_fields = True
 
     def get_queryset(self):
-        return super(NonEmptyGroupManager, self).get_queryset().exclude(
-                members=None)
+        return super(NonEmptyGroupManager, self).get_queryset().exclude(members=None)
 
 
 class TavernGroup(models.Model):
@@ -27,9 +27,13 @@ class TavernGroup(models.Model):
                                     blank=True)
     country = models.CharField(max_length=20)
     city = models.CharField(max_length=20)
-    creator = models.ForeignKey(User, related_name="created_groups")
-    organizers = models.ManyToManyField(User, related_name="organizes_groups")
-    members = models.ManyToManyField(User, through="Membership", related_name="tavern_groups")
+    creator = models.ForeignKey(User,
+                                related_name="created_groups")
+    organizers = models.ManyToManyField(User,
+                                        related_name="organizes_groups")
+    members = models.ManyToManyField(User,
+                                     through="Membership",
+                                     related_name="tavern_groups")
     slug = models.SlugField(max_length=50)
 
     default = models.Manager()
@@ -52,8 +56,10 @@ class TavernGroup(models.Model):
 
 class Membership(models.Model):
     "People who are in a TavernGroup"
-    user = models.ForeignKey(User, related_name='tgroup_memberships')
-    tavern_group = models.ForeignKey(TavernGroup, related_name='memberships')
+    user = models.ForeignKey(User,
+                             related_name='tgroup_memberships')
+    tavern_group = models.ForeignKey(TavernGroup,
+                                     related_name='memberships')
     join_date = models.DateTimeField()
 
     def __unicode__(self):
@@ -64,8 +70,7 @@ class EventShowManager(models.Manager):
     user_for_related_fields = True
 
     def get_queryset(self):
-        return super(EventShowManager, self).get_queryset().filter(
-                show=True)
+        return super(EventShowManager, self).get_queryset().filter(show=True)
 
 
 class Event(models.Model):
