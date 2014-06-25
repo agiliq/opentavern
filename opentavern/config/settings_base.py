@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'accounts',
     'south',
     'guardian',
+    'bootstrap3_datetime',
 
     'allauth',
     'allauth.account',

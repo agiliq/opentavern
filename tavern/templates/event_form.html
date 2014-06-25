@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block javascript %}
+{{ form.media }}
+{% endblock %}
+{% block content %}
+<form action="" method="POST" class="form-horizontal">
+{% csrf_token %}
+
+    <fieldset>
+          <legend>Event Form</legend>
+
+    {% if form.non_field_errors %}
+        {% for non_field_error in form.non_field_errors %}
+            <div class="alert alert-danger">
+                <button class="close" type="button" data-dismiss="alert">&times;</button>
+                {{ non_field_error }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+          {% for field in form %}
+            <div class="control-group">
+              <label class="control-label" for="input01">{{ field.label_tag }}</label>
+              <div class="controls">
+                {{ field }}
+              </div>
+
+              {% if field.errors %}
+               {% for error in field.errors %}
+                 <div class="alert alert-info">
+             {{ error }}
+                 </div>
+               {% endfor %}
+              {% endif %}
+
+            </div>
+          {% endfor %}
+
+      <br/>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save changes</button>
+            <button class="btn btn-danger" type="reset">Cancel</button>
+          </div>
+
+    </fieldset>
+
+</form>
+
+{% endblock content%}

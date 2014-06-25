@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load guardian_tags %}
 
 {% block content %}
     <h1> Group Name: {{ group.name }} </h1>
@@ -17,9 +18,10 @@
         <li>{{ member.user }}</li>
     {% endfor %}
     </ul>
-    {% ifequal group.creator user %}
+        {% get_obj_perms request.user for group as "group_perms" %}
+        {% if "change_taverngroup" in group_perms %}
         <h3><a href="{% url 'tavern_group_update' group.slug %}">Edit Group</a></h3>
-    {% endifequal %}
+        {% endif %}
     {% include 'past_events.html' %}
 
     {% include 'upcoming_events.html' %}

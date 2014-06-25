@@ -3,7 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from datetime import datetime
 
-from .models import TavernGroup, Event
+from .models import TavernGroup, Event, Membership
+from bootstrap3_datetime.widgets import DateTimePicker
 
 
 class CreateGroupForm(forms.ModelForm):
@@ -15,47 +16,39 @@ class CreateGroupForm(forms.ModelForm):
 
 class CreateEventForm(forms.ModelForm):
     """ CreateEventForm """
-    event_time = forms.CharField(max_length=50, required=True)
 
     class Meta:
         model = Event
-        exclude = ['creator', 'slug', 'starts_at', 'ends_at', 'show']
+        exclude = ['creator', 'slug', 'show']
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(CreateEventForm, self).__init__(*args, **kwargs)
         self.fields['group'].queryset = self.user.tavern_groups.all()
+        self.fields['starts_at'].widget = DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",})
+        self.fields['ends_at'].widget = DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",})
 
-    def save(self, commit=True):
-        event = super(CreateEventForm, self).save(commit=False)
-        event_time = self.cleaned_data['event_time'].split(" - ")
-        start_time = datetime.strptime(event_time[0], '%d/%m/%Y %I:%M %p')
-        end_time = datetime.strptime(event_time[1], '%d/%m/%Y %I:%M %p')
-        event.starts_at = start_time
-        event.ends_at = end_time
-        if commit:
-            event.save()
-        return event
+    def clean(self):
+        cleaned_data = super(CreateEventForm, self).clean()
+        group = cleaned_data.get('group')
+        try:
+            Membership.objects.get(user=self.user, tavern_group=group)
+        except Membership.DoesNotExist:
+            raise forms.ValidationError("You are not a member of this group")
+        return cleaned_data
 
 
 class UpdateEventForm(forms.ModelForm):
     """ Change Event Details """
-    event_time = forms.CharField(max_length=50, required=True)
 
     class Meta:
         model = Event
-        exclude = ['group', 'creator', 'slug', 'starts_at', 'ends_at', 'show']
+        exclude = ['creator', 'slug', 'show', 'group']
 
-    def save(self, commit=True):
-        event = super(UpdatEventForm, self).save(commit=False)
-        event_time = self.cleaned_data['event_time'].split(" - ")
-        start_time = datetime.strptime(event_time[0], '%d/%m/%Y %I:%M %p')
-        end_time = datetime.strptime(event_time[1], '%d/%m/%Y %I:%M %p')
-        event.starts_at = start_time
-        event.ends_at = end_time
-        if commit:
-            event.save()
-        return event
+    def __init__(self, *args, **kwargs):
+        super(UpdateEventForm, self).__init__(*args, **kwargs)
+        self.fields['starts_at'].widget = DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",})
+        self.fields['ends_at'].widget = DateTimePicker(options={"format": "YYYY-MM-DD HH:mm",})
 
 
 class UserCreateForm(UserCreationForm):

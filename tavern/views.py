@@ -161,7 +161,7 @@ class GroupCreate(LoginRequiredMixin, CreateView):
     """ Create new group """
     form_class = CreateGroupForm
     model = TavernGroup
-    template_name = "create_group.html"
+    template_name = "group_form.html"
 
     def form_valid(self, form):
         form.instance.creator = self.request.user
@@ -172,7 +172,7 @@ class GroupUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     """ Updates a group """
     model = TavernGroup
     form_class = CreateGroupForm
-    template_name = 'tavern_group_update.html'
+    template_name = 'group_form.html'
     permission_required = 'tavern.change_taverngroup'
     render_403 = True
     return_403 = True
@@ -182,7 +182,7 @@ class EventCreate(LoginRequiredMixin, CreateView):
     """ Creates new Event """
     form_class = CreateEventForm
     model = Event
-    template_name = "create_event.html"
+    template_name = "event_form.html"
 
     def get_form_kwargs(self):
         kwargs = super(EventCreate, self).get_form_kwargs()
@@ -198,14 +198,10 @@ class EventUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     """ Update an Event """
     model = Event
     form_class = UpdateEventForm
-    template_name = 'tavern_event_update.html'
+    template_name = 'event_form.html'
     permission_required = 'tavern.change_event'
     render_403 = True
     return_403 = True
-
-    def form_valid(self, form):
-        form.instance.creator = self.request.user
-        return super(EventUpdate, self).form_valid(form)
 
 
 class RsvpDelete(LoginRequiredMixin, DeleteView):

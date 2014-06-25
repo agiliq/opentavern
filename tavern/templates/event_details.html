@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load guardian_tags %}
 
 {% block content %}
     <h1> Event Name: {{ event.name }} </h1>
@@ -69,7 +70,10 @@
         {% endfor %}
     </ol>
     {% if editable %}
-    <h3><a href="{% url 'tavern_event_update' event.slug %}">Edit Event</a></h3>
+        {% get_obj_perms request.user for event as "event_perms" %}
+        {% if "change_event" in event_perms %}
+        <h3><a href="{% url 'tavern_event_update' event.slug %}">Edit Event</a></h3>
+        {% endif %}
     {% endif %}
 {% endblock content %}
 

@@ -1,11 +1,17 @@
 # pylint: disable=method-hidden
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 
 from .slugify import unique_slugify
+
+class NonEmptyGroupManager(models.Manager):
+    user_for_related_fields = True
+
+    def get_queryset(self):
+        return super(NonEmptyGroupManager, self).get_queryset().exclude(
+                members=None)
 
 
 class TavernGroup(models.Model):
@@ -25,6 +31,9 @@ class TavernGroup(models.Model):
     organizers = models.ManyToManyField(User, related_name="organizes_groups")
     members = models.ManyToManyField(User, through="Membership", related_name="tavern_groups")
     slug = models.SlugField(max_length=50)
+
+    default = models.Manager()
+    objects = NonEmptyGroupManager()
 
     def get_absolute_url(self):
         return reverse("tavern_group_details", kwargs={"slug": self.slug})

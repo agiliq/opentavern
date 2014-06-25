@@ -67,7 +67,8 @@ class TestViews(TestCase):
         group = create_and_get_tavern_group(creator)
         response = self.client.post(
             "/create_event/",
-            {'event_time': u'16/05/2014 12:00 AM - 16/05/2014 12:00 AM',
+            {'starts_at': u'2014-06-25 12:00',
+             'ends_at': u'2014-06-25 14:00',
              'group': group.id,
              'name': 'Test',
              'description': 'Test Event',
