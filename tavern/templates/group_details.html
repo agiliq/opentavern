@@ -20,7 +20,30 @@
     </ul>
         {% get_obj_perms request.user for group as "group_perms" %}
         {% if "change_taverngroup" in group_perms %}
-        <h3><a href="{% url 'tavern_group_update' group.slug %}">Edit Group</a></h3>
+        <a class="btn btn-default" href="{% url 'tavern_group_update' group.slug %}">Edit Group</a>
+        {% endif %}
+
+        {% if "delete_taverngroup" in group_perms %}
+        <a class="btn btn-default" href="{% url 'edit_organizers' group.slug %}">Add/Remove Organizers</a>
+        <div id="deleteGroupModal" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Are you sure?</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{% url 'delete_group' group.slug %}" method="POST">
+                            {% csrf_token %}
+                            <button class="btn btn-default" type="submit">Yes</button>
+                            <button class="btn btn-default" type="button" class="close" data-dismiss="modal">No</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer"></div>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-danger" data-toggle="modal" data-target="#deleteGroupModal">Delete</button>
         {% endif %}
     {% include 'past_events.html' %}
 

@@ -3,16 +3,18 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.views.generic import DetailView
 from django.views.generic import CreateView, UpdateView, DeleteView
+from django.views.generic.detail import SingleObjectMixin
 
 from guardian.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
 from .models import TavernGroup, Membership, Event, Attendee
-from .forms import CreateGroupForm, CreateEventForm, UpdateEventForm
+from .forms import CreateGroupForm, CreateEventForm, UpdateEventForm, AddOrganizerForm, RemoveOrganizerForm
+from .multiform import MultiFormsView
 
 
 def today_date():
@@ -175,6 +177,50 @@ class GroupUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     return_403 = True
 
 
+class GroupDelete(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = TavernGroup
+    permission_required = 'tavern.delete_taverngroup'
+    render_403 = True
+    return_403 = True
+
+    def get_success_url(self, **kwargs):
+        return reverse("index")
+
+
+class EditOrganizers(LoginRequiredMixin, PermissionRequiredMixin, SingleObjectMixin, MultiFormsView):
+    template_name = "edit_organizers.html"
+    form_classes = {'add': AddOrganizerForm,
+                    'remove': RemoveOrganizerForm
+                    }
+    success_url = '/'
+    model = TavernGroup
+    success_url = '/'
+    permission_required = 'tavern.delete_taverngroup'
+    render_403 = True
+    return_403 = True
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super(EditOrganizers, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super(EditOrganizers, self).post(request, *args, **kwargs)
+
+    def get_remove_initial(self):
+        return {'group': self.object.pk}
+
+    def add_form_valid(self, form):
+        for user in form.cleaned_data['users']:
+            self.object.organizers.add(user)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def remove_form_valid(self, form):
+        for user in form.cleaned_data['users']:
+            self.object.organizers.remove(user)
+        return HttpResponseRedirect(self.get_success_url())
+
+
 class EventCreate(LoginRequiredMixin, CreateView):
     """ Creates new Event """
     form_class = CreateEventForm
@@ -183,7 +229,7 @@ class EventCreate(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super(EventCreate, self).get_form_kwargs()
-        kwargs['user'] = self.request.user
+        kwargs['current_user'] = self.request.user
         return kwargs
 
     def form_valid(self, form):
@@ -201,6 +247,16 @@ class EventUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     return_403 = True
 
 
+class EventDelete(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Event
+    permission_required = 'tavern.delete_event'
+    render_403 = True
+    return_403 = True
+
+    def get_success_url(self, **kwargs):
+        return reverse("tavern_group_details", kwargs={"slug": self.object.group.slug})
+
+
 class RsvpDelete(LoginRequiredMixin, DeleteView):
     """ Remove a RSVP"""
     model = Attendee
@@ -215,4 +271,7 @@ create_group = GroupCreate.as_view()
 create_event = EventCreate.as_view()
 event_details = EventDetail.as_view()
 group_details = GroupDetail.as_view()
+group_delete = GroupDelete.as_view()
+event_delete = EventDelete.as_view()
 delete_rsvp = RsvpDelete.as_view()
+edit_organizers = EditOrganizers.as_view()
