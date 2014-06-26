@@ -17,16 +17,12 @@ class NonEmptyGroupManager(models.Manager):
 class TavernGroup(models.Model):
     "Similar interests group, create events for these"
     name = models.CharField(max_length=40, unique=True)
-    group_type = models.CharField(max_length=100)
     description = models.CharField(max_length=200)
     members_name = models.CharField(verbose_name="Member's Name",
                                     help_text='What do you want to \
                                               call the group members?',
                                     max_length=40,
-                                    null=True,
                                     blank=True)
-    country = models.CharField(max_length=20)
-    city = models.CharField(max_length=20)
     creator = models.ForeignKey(User,
                                 related_name="created_groups")
     organizers = models.ManyToManyField(User,

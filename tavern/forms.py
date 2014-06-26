@@ -3,8 +3,9 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.forms.widgets import HiddenInput
 
-from .models import TavernGroup, Event, Membership
 from bootstrap3_datetime.widgets import DateTimePicker
+
+from .models import TavernGroup, Event, Membership
 
 
 class CreateGroupForm(forms.ModelForm):
