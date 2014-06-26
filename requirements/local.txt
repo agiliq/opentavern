@@ -1,0 +1,4 @@
+-r common.txt
+pep8==1.4.6
+pylint==1.0.0
+pinax.checkers==1.0

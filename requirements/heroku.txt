@@ -1,0 +1,6 @@
+# this lists heroku specific dependencies
+-r local.txt
+psycopg2==2.5.2
+dj-database-url==0.3.0
+dj-static==0.0.5
+gunicorn==19.0.0
