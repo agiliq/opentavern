@@ -192,9 +192,7 @@ class EditOrganizers(LoginRequiredMixin, PermissionRequiredMixin, SingleObjectMi
     form_classes = {'add': AddOrganizerForm,
                     'remove': RemoveOrganizerForm
                     }
-    success_url = '/'
     model = TavernGroup
-    success_url = '/'
     permission_required = 'tavern.delete_taverngroup'
     render_403 = True
     return_403 = True
@@ -219,6 +217,9 @@ class EditOrganizers(LoginRequiredMixin, PermissionRequiredMixin, SingleObjectMi
         for user in form.cleaned_data['users']:
             self.object.organizers.remove(user)
         return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self, **kwargs):
+        return reverse('tavern_group_details', kwargs={'slug': self.object.slug})
 
 
 class EventCreate(LoginRequiredMixin, CreateView):

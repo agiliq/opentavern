@@ -194,7 +194,6 @@ class TestViews(TestCase):
             {'name': 'OpenTavern',
              'description': 'A Test Group',
              'members_name': 'Djangoers'})
-        self.assertEqual(response.status_code, 302)
 
         self.assertRedirects(response,
                              reverse("tavern_group_details", kwargs={'slug': 'opentavern'}),
@@ -232,6 +231,49 @@ class TestViews(TestCase):
                              reverse("tavern_group_details", kwargs={'slug': event.group.slug}),
                              status_code=302)
         self.assertEqual(event in Event.default.all(), False)
+
+    def test_change_rsvp(self):
+        event = create_and_get_event(user=self.user)
+        response = self.client.get(reverse("change_rsvp",
+                                           kwargs={'event_id': event.pk, 'rsvp_status': 'no'}))
+        self.assertContains(response, 'You are not attending this event')
+
+        response = self.client.get(reverse("change_rsvp",
+                                           kwargs={'event_id': event.pk, 'rsvp_status': 'maybe'}))
+        self.assertContains(response, 'You may attend this event')
+
+    def test_delete_rsvp(self):
+        event = create_and_get_event(user=self.user)
+        attendee = Attendee.objects.get(event=event, user=self.user)
+        response = self.client.post(reverse("delete_rsvp",
+                                            kwargs={'pk': attendee.pk}), follow=True)
+        self.assertRedirects(response,
+                             reverse("tavern_event_details", kwargs={'slug': event.slug}),
+                             status_code=302)
+
+    def test_edit_organizers(self):
+        group = create_and_get_tavern_group(self.user)
+        org = User.objects.create_user(username='org',
+                                       email='org@agiliq.com',
+                                       password='org')
+        response = self.client.post(
+            reverse('edit_organizers', kwargs={'slug': group.slug}),
+            {'usernames': org.username,
+             'action': 'add'})
+        self.assertRedirects(response,
+                             reverse("tavern_group_details", kwargs={'slug': group.slug}),
+                             status_code=302)
+        self.assertEqual(org in group.organizers.all(), True)
+
+        response = self.client.post(
+            reverse('edit_organizers', kwargs={'slug': group.slug}),
+            {'usernames': org.username,
+             'action': 'remove',
+             'group': group.pk})
+        self.assertRedirects(response,
+                             reverse("tavern_group_details", kwargs={'slug': group.slug}),
+                             status_code=302)
+        self.assertEqual(org in group.organizers.all(), False)
 
 
 def create_and_get_user():
