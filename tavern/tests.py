@@ -1,5 +1,6 @@
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 
 from .models import TavernGroup, Membership, Event, Attendee
 
@@ -8,10 +9,27 @@ from datetime import datetime, timedelta
 
 class TestModels(TestCase):
 
+    def test_tavern_group_permissions(self):
+        """Test that creator of the group has change and delete
+        permissions for that group and oganizer should have only
+        change permission"""
+        creator = create_and_get_user()
+        tavern_group = create_and_get_tavern_group(creator=creator)
+        self.assertEqual(creator.has_perm('change_taverngroup', tavern_group), True)
+        self.assertEqual(creator.has_perm('delete_taverngroup', tavern_group), True)
+
+        user = User.objects.create_user(username='test2',
+                                        email='test2@agiliq.com',
+                                        password='test2')
+        tavern_group.organizers.add(user)
+        self.assertEqual(user.has_perm('change_taverngroup', tavern_group), True)
+        self.assertEqual(user.has_perm('delete_taverngroup', tavern_group), False)
+
     def test_tavern_group_save(self):
         """When a TavernGroup is saved, we want to make sure
         an instance of Membership which associates the creator
         with group is created"""
+
         creator = create_and_get_user()
         tavern_group = create_and_get_tavern_group(creator=creator)
         self.assertEqual(TavernGroup.objects.count(), 1)
@@ -41,6 +59,40 @@ class TestModels(TestCase):
         self.assertEqual(Attendee.objects.count(), 2)
         self.assertEqual(attendee.__unicode__(), u' - Tavern Event')
 
+    def test_event_permisssions(self):
+        """Test that creator of an event have change and delete
+        permissions. Creator of the group in which that event is should also
+        have these permission"""
+
+        group_creator = create_and_get_user()
+        tavern_group = create_and_get_tavern_group(creator=group_creator)
+        event_creator = User.objects.create_user(username='test2',
+                                                 email='test2@agiliq.com',
+                                                 password='test2')
+        event = create_and_get_event(user=event_creator, tgroup=tavern_group)
+        self.assertEqual(group_creator.has_perm('change_event', event), True)
+        self.assertEqual(group_creator.has_perm('delete_event', event), True)
+        self.assertEqual(event_creator.has_perm('change_event', event), True)
+        self.assertEqual(event_creator.has_perm('delete_event', event), True)
+
+    def test_event_manager(self):
+        """Test the new objects manager that it returns only
+        events that have show=True"""
+
+        event1 = create_and_get_event()
+        event2 = Event.objects.create(
+            group=event1.group,
+            name="Tavern Event 2",
+            description="Test cases",
+            starts_at=datetime.now(),
+            ends_at=datetime.now(),
+            location="Hyderabad",
+            creator=event1.creator)
+        event2.show = False
+        event2.save()
+        self.assertEqual(event1 in Event.objects.all(), True)
+        self.assertEqual(event2 in Event.objects.all(), False)
+
 
 class TestViews(TestCase):
 
@@ -49,16 +101,13 @@ class TestViews(TestCase):
         self.client = Client()
         self.client.login(username="test", password="test")
 
-    # def test_today_date(self):
-        # self.assertEqual(today_date(), timezone.now().isoformat())
-
     def test_index(self):
-        response = self.client.get("/")
+        response = self.client.get(reverse("index"))
         self.assertEqual(len(response.context['joined_groups']), 0)
         self.assertEqual(response.status_code, 200)
 
         self.client.logout()
-        response = self.client.get("/")
+        response = self.client.get(reverse("index"))
         self.assertEqual(len(response.context['groups']), 0)
         self.assertEqual(response.status_code, 200)
 
@@ -66,7 +115,7 @@ class TestViews(TestCase):
         creator = self.user
         group = create_and_get_tavern_group(creator)
         response = self.client.post(
-            "/create_event/",
+            reverse("tavern_create_event"),
             {'starts_at': u'2014-06-25 12:00',
              'ends_at': u'2014-06-25 14:00',
              'group': group.id,
@@ -75,22 +124,18 @@ class TestViews(TestCase):
              'location': 'Hyderabad'})
         self.assertEqual(response.status_code, 302)
 
-        response = self.client.get('/create_event/')
+        response = self.client.get(reverse("tavern_create_event"))
         self.assertEqual(response.status_code, 200)
 
     def test_create_group(self):
-        creator = self.user
         response = self.client.post(
-            "/create_group/",
+            reverse("tavern_create_group"),
             {'name': 'OpenTavern',
-             'group_type': 'Technical',
              'description': 'A Test Group',
-             'members_name': 'Djangoers',
-             'country': 'India',
-             'city': 'Hyderabad'})
+             'members_name': 'Djangoers'})
         self.assertEqual(response.status_code, 302)
 
-        response = self.client.get('/create_group/')
+        response = self.client.get(reverse("tavern_create_group"))
         self.assertEqual(response.status_code, 200)
 
     def test_group_details(self):
@@ -103,17 +148,27 @@ class TestViews(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_event_details(self):
+        """ Test that events with valid slugs and show=True are shown,
+        otherwise return 404"""
+
         event = create_and_get_event(self.user)
-        response = self.client.get('/events/%s/' % event.slug)
+        response = self.client.get(reverse("tavern_event_details",
+                                           kwargs={'slug': event.slug}))
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get('/events/%s/' % 'incorrect_slug')
+        response = self.client.get(reverse("tavern_event_details",
+                                           kwargs={'slug': 'incorrect_slug'}))
+        self.assertEqual(response.status_code, 404)
+        event.show = False
+        event.save()
+        response = self.client.get(reverse("tavern_event_details",
+                                           kwargs={'slug': event.slug}))
         self.assertEqual(response.status_code, 404)
 
     def test_tavern_toggle_member(self):
         group = create_and_get_tavern_group(self.user)
         response = self.client.post(
-            '/tavern_toggle_member/',
+            reverse('tavern_toggle_member'),
             {'user_id': self.user.id,
              'slug': group.slug})
         self.assertEqual(response.status_code, 200)
@@ -123,10 +178,102 @@ class TestViews(TestCase):
                                         password='test2')
         group = create_and_get_tavern_group(user, name='group2')
         response = self.client.post(
-            '/tavern_toggle_member/',
+            reverse('tavern_toggle_member'),
             {'user_id': self.user.id,
              'slug': group.slug})
         self.assertEqual(response.status_code, 200)
+
+    def test_group_update(self):
+        group = create_and_get_tavern_group(self.user)
+        response = self.client.get(reverse("tavern_group_update",
+                                           kwargs={'slug': group.slug}))
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post(
+            reverse("tavern_group_update", kwargs={'slug': group.slug}),
+            {'name': 'OpenTavern',
+             'description': 'A Test Group',
+             'members_name': 'Djangoers'})
+
+        self.assertRedirects(response,
+                             reverse("tavern_group_details", kwargs={'slug': 'opentavern'}),
+                             status_code=302)
+
+    def test_group_delete(self):
+        group = create_and_get_tavern_group(self.user)
+        response = self.client.post(reverse("delete_group",
+                                            kwargs={'slug': group.slug}), follow=True)
+        self.assertRedirects(response, reverse("index"), status_code=302)
+        self.assertEqual(group in TavernGroup.objects.all(), False)
+
+    def test_event_update(self):
+        event = create_and_get_event(user=self.user)
+        response = self.client.get(reverse("tavern_event_update",
+                                           kwargs={'slug': event.slug}))
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post(
+            reverse("tavern_event_update", kwargs={'slug': event.slug}),
+            {'name': 'New name',
+             'description': 'A Test Event',
+             'starts_at': '2014-07-04 09:25',
+             'ends_at': '2014-07-04 20:25',
+             'location': 'Delhi'})
+        self.assertRedirects(response,
+                             reverse("tavern_event_details", kwargs={'slug': 'new-name'}),
+                             status_code=302)
+
+    def test_event_delete(self):
+        event = create_and_get_event(user=self.user)
+        response = self.client.post(reverse("delete_event",
+                                            kwargs={'slug': event.slug}), follow=True)
+        self.assertRedirects(response,
+                             reverse("tavern_group_details", kwargs={'slug': event.group.slug}),
+                             status_code=302)
+        self.assertEqual(event in Event.default.all(), False)
+
+    def test_change_rsvp(self):
+        event = create_and_get_event(user=self.user)
+        response = self.client.get(reverse("change_rsvp",
+                                           kwargs={'event_id': event.pk, 'rsvp_status': 'no'}))
+        self.assertContains(response, 'You are not attending this event')
+
+        response = self.client.get(reverse("change_rsvp",
+                                           kwargs={'event_id': event.pk, 'rsvp_status': 'maybe'}))
+        self.assertContains(response, 'You may attend this event')
+
+    def test_delete_rsvp(self):
+        event = create_and_get_event(user=self.user)
+        attendee = Attendee.objects.get(event=event, user=self.user)
+        response = self.client.post(reverse("delete_rsvp",
+                                            kwargs={'pk': attendee.pk}), follow=True)
+        self.assertRedirects(response,
+                             reverse("tavern_event_details", kwargs={'slug': event.slug}),
+                             status_code=302)
+
+    def test_edit_organizers(self):
+        group = create_and_get_tavern_group(self.user)
+        org = User.objects.create_user(username='org',
+                                       email='org@agiliq.com',
+                                       password='org')
+        response = self.client.post(
+            reverse('edit_organizers', kwargs={'slug': group.slug}),
+            {'usernames': org.username,
+             'action': 'add'})
+        self.assertRedirects(response,
+                             reverse("tavern_group_details", kwargs={'slug': group.slug}),
+                             status_code=302)
+        self.assertEqual(org in group.organizers.all(), True)
+
+        response = self.client.post(
+            reverse('edit_organizers', kwargs={'slug': group.slug}),
+            {'usernames': org.username,
+             'action': 'remove',
+             'group': group.pk})
+        self.assertRedirects(response,
+                             reverse("tavern_group_details", kwargs={'slug': group.slug}),
+                             status_code=302)
+        self.assertEqual(org in group.organizers.all(), False)
 
 
 def create_and_get_user():
@@ -147,7 +294,7 @@ def create_and_get_tavern_group(creator, name=None, organizers=None):
     return group
 
 
-def create_and_get_event(user=None):
+def create_and_get_event(user=None, tgroup=None):
     ends_at = datetime.now() + timedelta(days=1)
 
     if user:
@@ -155,7 +302,10 @@ def create_and_get_event(user=None):
     else:
         creator = create_and_get_user()
 
-    group = create_and_get_tavern_group(creator)
+    if tgroup:
+        group = tgroup
+    else:
+        group = create_and_get_tavern_group(creator)
     event = Event.objects.create(group=group,
                                  name="Tavern Event",
                                  description="Test cases",

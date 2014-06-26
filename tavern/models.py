@@ -96,9 +96,6 @@ class Event(models.Model):
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name)
         super(Event, self).save(*args, **kwargs)
-        # Old check: if event creator is member of that group
-        # but it should display only those groups which the user is member of and then
-        # check in form validation and return error
         Attendee.objects.get_or_create(
             user=self.creator,
             event=self,
