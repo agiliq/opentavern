@@ -1,5 +1,6 @@
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 
 from .models import TavernGroup, Membership, Event, Attendee
 
@@ -7,6 +8,22 @@ from datetime import datetime, timedelta
 
 
 class TestModels(TestCase):
+
+    def test_tavern_group_permissions(self):
+        """Test that creator of the group has change and delete
+        permissions for that group and oganizer should have only
+        change permission"""
+        creator = create_and_get_user()
+        tavern_group = create_and_get_tavern_group(creator=creator)
+        self.assertEqual(creator.has_perm('change_taverngroup', tavern_group), True)
+        self.assertEqual(creator.has_perm('delete_taverngroup', tavern_group), True)
+
+        user = User.objects.create_user(username='test2',
+                                        email='test2@agiliq.com',
+                                        password='test2')
+        tavern_group.organizers.add(user)
+        self.assertEqual(user.has_perm('change_taverngroup', tavern_group), True)
+        self.assertEqual(user.has_perm('delete_taverngroup', tavern_group), False)
 
     def test_tavern_group_save(self):
         """When a TavernGroup is saved, we want to make sure
@@ -41,6 +58,21 @@ class TestModels(TestCase):
         self.assertEqual(Attendee.objects.count(), 2)
         self.assertEqual(attendee.__unicode__(), u' - Tavern Event')
 
+    def test_event_permisssions(self):
+        """Test that creator of an event have change and delete
+        permissions. Creator of the group in which that event is should also
+        have these permission"""
+        group_creator = create_and_get_user()
+        tavern_group = create_and_get_tavern_group(creator=group_creator)
+        event_creator = User.objects.create_user(username='test2',
+                                                 email='test2@agiliq.com',
+                                                 password='test2')
+        event = create_and_get_event(user=event_creator, tgroup=tavern_group)
+        self.assertEqual(group_creator.has_perm('change_event', event), True)
+        self.assertEqual(group_creator.has_perm('delete_event', event), True)
+        self.assertEqual(event_creator.has_perm('change_event', event), True)
+        self.assertEqual(event_creator.has_perm('delete_event', event), True)
+
 
 class TestViews(TestCase):
 
@@ -49,16 +81,13 @@ class TestViews(TestCase):
         self.client = Client()
         self.client.login(username="test", password="test")
 
-    # def test_today_date(self):
-        # self.assertEqual(today_date(), timezone.now().isoformat())
-
     def test_index(self):
-        response = self.client.get("/")
+        response = self.client.get(reverse("index"))
         self.assertEqual(len(response.context['joined_groups']), 0)
         self.assertEqual(response.status_code, 200)
 
         self.client.logout()
-        response = self.client.get("/")
+        response = self.client.get(reverse("index"))
         self.assertEqual(len(response.context['groups']), 0)
         self.assertEqual(response.status_code, 200)
 
@@ -66,7 +95,7 @@ class TestViews(TestCase):
         creator = self.user
         group = create_and_get_tavern_group(creator)
         response = self.client.post(
-            "/create_event/",
+            reverse("tavern_create_event"),
             {'starts_at': u'2014-06-25 12:00',
              'ends_at': u'2014-06-25 14:00',
              'group': group.id,
@@ -75,22 +104,18 @@ class TestViews(TestCase):
              'location': 'Hyderabad'})
         self.assertEqual(response.status_code, 302)
 
-        response = self.client.get('/create_event/')
+        response = self.client.get(reverse("tavern_create_event"))
         self.assertEqual(response.status_code, 200)
 
     def test_create_group(self):
-        creator = self.user
         response = self.client.post(
-            "/create_group/",
+            reverse("tavern_create_group"),
             {'name': 'OpenTavern',
-             'group_type': 'Technical',
              'description': 'A Test Group',
-             'members_name': 'Djangoers',
-             'country': 'India',
-             'city': 'Hyderabad'})
+             'members_name': 'Djangoers'})
         self.assertEqual(response.status_code, 302)
 
-        response = self.client.get('/create_group/')
+        response = self.client.get(reverse("tavern_create_group"))
         self.assertEqual(response.status_code, 200)
 
     def test_group_details(self):
@@ -104,16 +129,18 @@ class TestViews(TestCase):
 
     def test_event_details(self):
         event = create_and_get_event(self.user)
-        response = self.client.get('/events/%s/' % event.slug)
+        response = self.client.get(reverse("tavern_event_details",
+                                           kwargs={'slug': event.slug}))
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get('/events/%s/' % 'incorrect_slug')
+        response = self.client.get(reverse("tavern_event_details",
+                                           kwargs={'slug': 'incorrect_slug'}))
         self.assertEqual(response.status_code, 404)
 
     def test_tavern_toggle_member(self):
         group = create_and_get_tavern_group(self.user)
         response = self.client.post(
-            '/tavern_toggle_member/',
+            reverse('tavern_toggle_member'),
             {'user_id': self.user.id,
              'slug': group.slug})
         self.assertEqual(response.status_code, 200)
@@ -123,7 +150,7 @@ class TestViews(TestCase):
                                         password='test2')
         group = create_and_get_tavern_group(user, name='group2')
         response = self.client.post(
-            '/tavern_toggle_member/',
+            reverse('tavern_toggle_member'),
             {'user_id': self.user.id,
              'slug': group.slug})
         self.assertEqual(response.status_code, 200)
@@ -147,7 +174,7 @@ def create_and_get_tavern_group(creator, name=None, organizers=None):
     return group
 
 
-def create_and_get_event(user=None):
+def create_and_get_event(user=None, tgroup=None):
     ends_at = datetime.now() + timedelta(days=1)
 
     if user:
@@ -155,7 +182,10 @@ def create_and_get_event(user=None):
     else:
         creator = create_and_get_user()
 
-    group = create_and_get_tavern_group(creator)
+    if tgroup:
+        group = tgroup
+    else:
+        group = create_and_get_tavern_group(creator)
     event = Event.objects.create(group=group,
                                  name="Tavern Event",
                                  description="Test cases",
