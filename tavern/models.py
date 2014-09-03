@@ -8,7 +8,6 @@ from .slugify import unique_slugify
 
 
 class NonEmptyGroupManager(models.Manager):
-    user_for_related_fields = True
 
     def get_queryset(self):
         return super(NonEmptyGroupManager, self).get_queryset().exclude(members=None)
@@ -63,7 +62,6 @@ class Membership(models.Model):
 
 
 class EventShowManager(models.Manager):
-    user_for_related_fields = True
 
     def get_queryset(self):
         return super(EventShowManager, self).get_queryset().filter(show=True)
