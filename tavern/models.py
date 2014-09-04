@@ -10,6 +10,9 @@ from .slugify import unique_slugify
 class NonEmptyGroupManager(models.Manager):
 
     def get_queryset(self):
+        """
+        Filters out tavern groups which contain no members
+        """
         return super(NonEmptyGroupManager, self).get_queryset().exclude(members=None)
 
 
@@ -97,7 +100,7 @@ class Event(models.Model):
         Attendee.objects.get_or_create(
             user=self.creator,
             event=self,
-            defaults={'rsvped_on': timezone.now().isoformat(),
+            defaults={'rsvped_on': timezone.now(),
                       'rsvp_status': 'yes'})
 
     def __unicode__(self):
