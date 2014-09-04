@@ -30,7 +30,7 @@ def index(request, template='home.html'):
         joined_groups = request.user.tavern_groups.all()
         unjoined_groups = list(set(all_groups) - set(joined_groups))
         upcoming_events = Event.objects.filter(starts_at__gt=today_date())
-        events = Attendee.objects.filter(user_id=request.user.id)
+        events = Attendee.objects.filter(user=request.user)
         events_rsvped = [event.event for event in events]
 
         context = {'joined_groups': joined_groups,
@@ -137,7 +137,7 @@ class EventDetail(UpcomingEventsMixin, DetailView):
         context = super(EventDetail, self).get_context_data(**kwargs)
         event = context['event']
         try:
-            attendee = Attendee.objects.get(user__id=self.request.user.id,
+            attendee = Attendee.objects.get(user=self.request.user,
                                             event=event)
             if attendee.rsvp_status == 'yes':
                 message = "You are attending this event."
