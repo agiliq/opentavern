@@ -69,6 +69,12 @@ class EventShowManager(models.Manager):
     def get_queryset(self):
         return super(EventShowManager, self).get_queryset().filter(show=True)
 
+    def upcoming(self):
+        return self.get_queryset().filter(starts_at__gte=timezone.now())
+
+    def past(self):
+        return self.get_queryset().filter(starts_at__lte=timezone.now())
+
 
 class Event(models.Model):
     "Event you can attend"
