@@ -90,8 +90,8 @@ class TestModels(TestCase):
             creator=event1.creator)
         event2.show = False
         event2.save()
-        self.assertEqual(event1 in Event.objects.all(), True)
-        self.assertEqual(event2 in Event.objects.all(), False)
+        self.assertEqual(event1 in Event.show_events.all(), True)
+        self.assertEqual(event2 in Event.show_events.all(), False)
 
 
 class TestViews(TestCase):
@@ -230,7 +230,7 @@ class TestViews(TestCase):
         self.assertRedirects(response,
                              reverse("tavern_group_details", kwargs={'slug': event.group.slug}),
                              status_code=302)
-        self.assertEqual(event in Event.default.all(), False)
+        self.assertEqual(event in Event.objects.all(), False)
 
     def test_change_rsvp(self):
         event = create_and_get_event(user=self.user)
