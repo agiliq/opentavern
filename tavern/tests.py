@@ -90,8 +90,8 @@ class TestModels(TestCase):
             creator=event1.creator)
         event2.show = False
         event2.save()
-        self.assertEqual(event1 in Event.show_events.all(), True)
-        self.assertEqual(event2 in Event.show_events.all(), False)
+        self.assertEqual(event1 in Event.visible_events.all(), True)
+        self.assertEqual(event2 in Event.visible_events.all(), False)
 
 
 class TestViews(TestCase):
