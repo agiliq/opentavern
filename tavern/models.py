@@ -84,8 +84,8 @@ class Event(models.Model):
     creator = models.ForeignKey(User)
     show = models.BooleanField(default=True)
 
-    default = models.Manager()
-    objects = EventShowManager()
+    objects = models.Manager()
+    show_events = EventShowManager()
 
     class Meta:
         unique_together = ('group', 'name')
