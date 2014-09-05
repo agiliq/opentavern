@@ -91,7 +91,7 @@ class Event(models.Model):
     show = models.BooleanField(default=True)
 
     objects = models.Manager()
-    show_events = EventShowManager()
+    visible_events = EventShowManager()
 
     class Meta:
         unique_together = ('group', 'name')
