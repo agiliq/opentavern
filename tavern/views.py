@@ -29,7 +29,7 @@ def index(request, template='home.html'):
     if request.user.is_authenticated():
         joined_groups = request.user.tavern_groups.all()
         unjoined_groups = list(set(all_groups) - set(joined_groups))
-        upcoming_events = Event.show_events.upcoming()
+        upcoming_events = Event.visible_events.upcoming()
         events = Attendee.objects.filter(user=request.user)
         events_rsvped = [event.event for event in events]
 
@@ -95,7 +95,7 @@ class UpcomingEventsMixin(object):
     """ Add upcoming events to the view """
     def get_context_data(self, **kwargs):
         context = super(UpcomingEventsMixin, self).get_context_data(**kwargs)
-        context['upcoming_events'] = Event.show_events.upcoming()
+        context['upcoming_events'] = Event.visible_events.upcoming()
         return context
 
 
@@ -107,7 +107,7 @@ class GroupDetail(UpcomingEventsMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(GroupDetail, self).get_context_data(**kwargs)
-        context['past_events'] = Event.show_events.past()
+        context['past_events'] = Event.visible_events.past()
 
         tavern_group = context['group']
         try:
@@ -131,7 +131,7 @@ class EventDetail(UpcomingEventsMixin, DetailView):
     model = Event
 
     def get_queryset(self, **kwargs):
-        return self.model.show_events.all()
+        return self.model.visible_events.all()
 
     def get_context_data(self, **kwargs):
         context = super(EventDetail, self).get_context_data(**kwargs)
