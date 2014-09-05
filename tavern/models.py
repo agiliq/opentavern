@@ -34,8 +34,8 @@ class TavernGroup(models.Model):
                                      related_name="tavern_groups")
     slug = models.SlugField(max_length=50)
 
-    default = models.Manager()
-    objects = NonEmptyGroupManager()
+    objects = models.Manager()
+    with_members = NonEmptyGroupManager()
 
     def get_absolute_url(self):
         return reverse("tavern_group_details", kwargs={"slug": self.slug})
