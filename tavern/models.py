@@ -46,7 +46,7 @@ class TavernGroup(models.Model):
         Membership.objects.get_or_create(
             user=self.creator,
             tavern_group=self,
-            defaults={'join_date': timezone.now().isoformat()})
+            defaults={'join_date': timezone.now()})
 
     def __unicode__(self):
         return "%s" % self.name
