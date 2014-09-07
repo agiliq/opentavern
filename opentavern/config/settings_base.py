@@ -148,6 +148,7 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+
 # Guardian specific configuration
 ANONYMOUS_USER_ID = -1
 

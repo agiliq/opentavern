@@ -34,8 +34,8 @@ class TavernGroup(models.Model):
                                      related_name="tavern_groups")
     slug = models.SlugField(max_length=50)
 
-    default = models.Manager()
-    objects = NonEmptyGroupManager()
+    objects = models.Manager()
+    with_members = NonEmptyGroupManager()
 
     def get_absolute_url(self):
         return reverse("tavern_group_details", kwargs={"slug": self.slug})
@@ -69,6 +69,12 @@ class EventShowManager(models.Manager):
     def get_queryset(self):
         return super(EventShowManager, self).get_queryset().filter(show=True)
 
+    def upcoming(self):
+        return self.get_queryset().filter(starts_at__gte=timezone.now())
+
+    def past(self):
+        return self.get_queryset().filter(starts_at__lte=timezone.now())
+
 
 class Event(models.Model):
     "Event you can attend"
@@ -84,8 +90,8 @@ class Event(models.Model):
     creator = models.ForeignKey(User)
     show = models.BooleanField(default=True)
 
-    default = models.Manager()
-    objects = EventShowManager()
+    objects = models.Manager()
+    visible_events = EventShowManager()
 
     class Meta:
         unique_together = ('group', 'name')

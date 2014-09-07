@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'tavern/base.html' %}
 
 {% block content %}
 
@@ -38,7 +38,7 @@
     </div>
 
     {% if past_events %}
-        {% include 'past_events.html' %}
+        {% include 'tavern/past_events.html' %}
     {% endif %}
 
     {% if events_rsvped %}
@@ -72,7 +72,7 @@
     {% endif %}
 
     {% if upcoming_events %}
-        {% include 'upcoming_events.html' %}
+        {% include 'tavern/upcoming_events.html' %}
     {% endif %}
 
 {% endblock content %}
