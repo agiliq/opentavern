@@ -23,7 +23,7 @@ def today_date():
     return today
 
 
-def index(request, template='home.html'):
+def index(request, template='tavern/home.html'):
     """ index page """
     all_groups = TavernGroup.objects.all()
     if request.user.is_authenticated():

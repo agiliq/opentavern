@@ -149,10 +149,6 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 
-TEMPLATE_DIRS = (
-    SITE_PATH + '/tavern/templates/tavern/'
-  
-    ) 
 # Guardian specific configuration
 ANONYMOUS_USER_ID = -1
 
