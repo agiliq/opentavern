@@ -101,7 +101,7 @@ class UpcomingEventsMixin(object):
 
 class GroupDetail(UpcomingEventsMixin, DetailView):
     """ Group details Page """
-    template_name = "group_details.html"
+    template_name = "tavern/group_details.html"
     context_object_name = "group"
     model = TavernGroup
 
@@ -126,7 +126,7 @@ class GroupDetail(UpcomingEventsMixin, DetailView):
 
 class EventDetail(UpcomingEventsMixin, DetailView):
     """ Give details about an event and its attendees"""
-    template_name = "event_details.html"
+    template_name = "tavern/event_details.html"
     context_object_name = "event"
     model = Event
 
@@ -160,7 +160,7 @@ class GroupCreate(LoginRequiredMixin, CreateView):
     """ Create new group """
     form_class = CreateGroupForm
     model = TavernGroup
-    template_name = "group_form.html"
+    template_name = "tavern/group_form.html"
 
     def form_valid(self, form):
         form.instance.creator = self.request.user
@@ -171,7 +171,7 @@ class GroupUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     """ Updates a group """
     model = TavernGroup
     form_class = CreateGroupForm
-    template_name = 'group_form.html'
+    template_name = 'tavern/group_form.html'
     permission_required = 'tavern.change_taverngroup'
     render_403 = True
     return_403 = True
@@ -188,7 +188,7 @@ class GroupDelete(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
 
 class EditOrganizers(LoginRequiredMixin, PermissionRequiredMixin, SingleObjectMixin, MultiFormsView):
-    template_name = "edit_organizers.html"
+    template_name = "tavern/edit_organizers.html"
     form_classes = {'add': AddOrganizerForm,
                     'remove': RemoveOrganizerForm
                     }
@@ -226,7 +226,7 @@ class EventCreate(LoginRequiredMixin, CreateView):
     """ Creates new Event """
     form_class = CreateEventForm
     model = Event
-    template_name = "event_form.html"
+    template_name = "tavern/event_form.html"
 
     def get_form_kwargs(self):
         kwargs = super(EventCreate, self).get_form_kwargs()
@@ -242,7 +242,7 @@ class EventUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     """ Update an Event """
     model = Event
     form_class = UpdateEventForm
-    template_name = 'event_form.html'
+    template_name = 'tavern/event_form.html'
     permission_required = 'tavern.change_event'
     render_403 = True
     return_403 = True
