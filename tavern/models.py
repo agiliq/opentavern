@@ -113,11 +113,9 @@ class Event(models.Model):
         return "%s" % self.name
 
 
-RSVP_CHOICES = (('yes', 'Yes'), ('no', 'No'), ('maybe', 'May Be'))
-
-
 class Attendee(models.Model):
     "People who have RSVPed to events"
+    RSVP_CHOICES = (('yes', 'Yes'), ('no', 'No'), ('maybe', 'May Be'))
     user = models.ForeignKey(User)
     event = models.ForeignKey(Event)
     rsvped_on = models.DateTimeField()
