@@ -42,7 +42,7 @@ class TavernGroup(models.Model):
         return reverse("tavern_group_details", kwargs={"slug": self.slug})
 
     def save(self, *args, **kwargs):
-    	self.slug = slugify(self.name)
+        self.slug = slugify(self.name)
         super(TavernGroup, self).save(*args, **kwargs)
         Membership.objects.get_or_create(
             user=self.creator,
