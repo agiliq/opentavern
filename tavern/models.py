@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.urlresolvers import reverse
+from django.template.defaultfilters import slugify
 
 from .slugify import unique_slugify
 
@@ -41,7 +42,7 @@ class TavernGroup(models.Model):
         return reverse("tavern_group_details", kwargs={"slug": self.slug})
 
     def save(self, *args, **kwargs):
-        unique_slugify(self, self.name)
+        self.slug = slugify(self.name)
         super(TavernGroup, self).save(*args, **kwargs)
         Membership.objects.get_or_create(
             user=self.creator,
