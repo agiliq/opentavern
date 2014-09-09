@@ -86,6 +86,9 @@ class Event(models.Model):
     starts_at = models.DateTimeField(null=True, blank=True)
     ends_at = models.DateTimeField(null=True, blank=True)
     location = models.TextField(null=True, blank=True)
+
+    attendees = models.ManyToManyField(User, through="Attendee",
+                                              related_name="events_attending")
     slug = models.SlugField(max_length=250)
 
     creator = models.ForeignKey(User)
@@ -114,19 +117,16 @@ class Event(models.Model):
         return "%s" % self.name
 
 
-RSVP_CHOICES = (('yes', 'Yes'), ('no', 'No'), ('maybe', 'May Be'))
-
-
 class Attendee(models.Model):
     "People who have RSVPed to events"
+    RSVP_CHOICES = (('yes', 'Yes'), ('no', 'No'), ('maybe', 'May Be'))
     user = models.ForeignKey(User)
     event = models.ForeignKey(Event)
     rsvped_on = models.DateTimeField()
     rsvp_status = models.CharField(verbose_name="RSVP Status",
                                    choices=RSVP_CHOICES,
                                    max_length=5,
-                                   blank=True,
-                                   null=True)
+                                   default="yes")
 
     def __unicode__(self):
         return "%s - %s" % (self.user.first_name, self.event.name)

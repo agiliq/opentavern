@@ -20,7 +20,7 @@ class CreateEventForm(forms.ModelForm):
 
     class Meta:
         model = Event
-        exclude = ['creator', 'slug', 'show']
+        exclude = ['creator', 'slug', 'show', 'attendees']
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('current_user', None)
@@ -44,7 +44,7 @@ class UpdateEventForm(forms.ModelForm):
 
     class Meta:
         model = Event
-        exclude = ['creator', 'slug', 'show', 'group']
+        exclude = ['creator', 'slug', 'show', 'group', 'attendees']
 
     def __init__(self, *args, **kwargs):
         super(UpdateEventForm, self).__init__(*args, **kwargs)
