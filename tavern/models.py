@@ -86,7 +86,7 @@ class Event(models.Model):
     ends_at = models.DateTimeField(null=True, blank=True)
     location = models.TextField(null=True, blank=True)
 
-    attendees = models.ManyToManyField(User, through="Attendee",
+    attending_events = models.ManyToManyField(User, through="Attendee",
                                               related_name="events_attending")
     slug = models.SlugField(max_length=250)
 
