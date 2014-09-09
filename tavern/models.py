@@ -125,8 +125,7 @@ class Attendee(models.Model):
     rsvp_status = models.CharField(verbose_name="RSVP Status",
                                    choices=RSVP_CHOICES,
                                    max_length=5,
-                                   blank=True,
-                                   null=True)
+                                   default="yes")
 
     def __unicode__(self):
         return "%s - %s" % (self.user.first_name, self.event.name)
