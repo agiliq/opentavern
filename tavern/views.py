@@ -16,7 +16,7 @@ from .models import TavernGroup, Membership, Event, Attendee
 from .forms import CreateGroupForm, CreateEventForm, UpdateEventForm, AddOrganizerForm, RemoveOrganizerForm
 from .multiform import MultiFormsView
 
-import pdb
+
 def today_date():
     today_object = timezone.now()
     today = today_object.isoformat()
