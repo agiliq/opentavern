@@ -16,7 +16,7 @@ from .models import TavernGroup, Membership, Event, Attendee
 from .forms import CreateGroupForm, CreateEventForm, UpdateEventForm, AddOrganizerForm, RemoveOrganizerForm
 from .multiform import MultiFormsView
 
-
+import pdb
 def today_date():
     today_object = timezone.now()
     today = today_object.isoformat()
@@ -30,8 +30,7 @@ def index(request, template='tavern/home.html'):
         joined_groups = request.user.tavern_groups.all()
         unjoined_groups = list(set(all_groups) - set(joined_groups))
         upcoming_events = Event.visible_events.upcoming()
-        events = request.user.events_attending.all()
-        events_rsvped = [event.event for event in events]
+        events_rsvped = request.user.events_attending.all()
 
         context = {'joined_groups': joined_groups,
                    'unjoined_groups': unjoined_groups,
