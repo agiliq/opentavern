@@ -276,7 +276,8 @@ class RsvpDelete(LoginRequiredMixin, DeleteView):
     model = Attendee
 
     def get_success_url(self, **kwargs):
-        return reverse("tavern_event_details", kwargs={"slug": self.object.event.slug})
+        return reverse("tavern_event_details", kwargs={"slug": self.object.event.slug,
+                                                       "group": self.object.event.group.slug})
 
 
 tavern_group_update = GroupUpdate.as_view()

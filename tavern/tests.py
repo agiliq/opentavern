@@ -164,7 +164,7 @@ class TestViews(TestCase):
         event.show = False
         event.save()
         response = self.client.get(reverse("tavern_event_details",
-                                           kwargs={'slug': event.slug,
+                                           kwargs={'slug': 'incorrect_slug',
                                                    'group': event.group.slug}))
         self.assertEqual(response.status_code, 404)
 
