@@ -135,6 +135,7 @@ class Attendee(models.Model):
 
 
 #Helper methods
+
 def get_groups(user):
     user_groups = TavernGroup.objects.filter(members=user)
     return user_groups
