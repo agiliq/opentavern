@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.urlresolvers import reverse
+from django.shortcuts import get_object_or_404
 
 from .slugify import unique_slugify
 
