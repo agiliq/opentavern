@@ -3,7 +3,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.urlresolvers import reverse
-from django.shortcuts import get_object_or_404
 
 from .slugify import unique_slugify
 
@@ -132,7 +131,6 @@ class Attendee(models.Model):
         return "%s - %s" % (self.user.first_name, self.event.name)
 
 
-def get_unjoined_groups(username):
-    user = get_object_or_404(User, username=username)
+def get_unjoined_groups(user):
     user_unjoined_groups = TavernGroup.objects.exclude(members=user)
     return user_unjoined_groups
