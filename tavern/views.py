@@ -128,9 +128,7 @@ class EventDetail(UpcomingEventsMixin, DetailView):
     template_name = "tavern/event_details.html"
     context_object_name = "event"
     model = Event
-
-    def get_queryset(self, **kwargs):
-        return self.model.visible_events.all()
+    queryset = Event.visible_events.all()
 
     def get_context_data(self, **kwargs):
         context = super(EventDetail, self).get_context_data(**kwargs)
