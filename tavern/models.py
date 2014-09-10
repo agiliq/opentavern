@@ -134,7 +134,10 @@ class Attendee(models.Model):
         return "%s - %s" % (self.user.first_name, self.event.name)
 
 
-#Helper methods
+def get_unjoined_groups(user):
+    user_unjoined_groups = TavernGroup.objects.exclude(members=user)
+    return user_unjoined_groups
+
 
 def get_groups(user):
     user_groups = TavernGroup.objects.filter(members=user)
