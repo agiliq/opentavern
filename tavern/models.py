@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.urlresolvers import reverse
+from django.template.defaultfilters import slugify
 
 from .slugify import unique_slugify
 
@@ -41,7 +42,7 @@ class TavernGroup(models.Model):
         return reverse("tavern_group_details", kwargs={"slug": self.slug})
 
     def save(self, *args, **kwargs):
-        unique_slugify(self, self.name)
+        self.slug = slugify(self.name)
         super(TavernGroup, self).save(*args, **kwargs)
         Membership.objects.get_or_create(
             user=self.creator,
@@ -59,6 +60,9 @@ class Membership(models.Model):
     tavern_group = models.ForeignKey(TavernGroup,
                                      related_name='memberships')
     join_date = models.DateTimeField()
+
+    class Meta:
+        unique_together = ['user', 'tavern_group']
 
     def __unicode__(self):
         return "%s - %s" % (self.user.username, self.tavern_group.name)
@@ -85,6 +89,9 @@ class Event(models.Model):
     starts_at = models.DateTimeField(null=True, blank=True)
     ends_at = models.DateTimeField(null=True, blank=True)
     location = models.TextField(null=True, blank=True)
+
+    attendees = models.ManyToManyField(User, through="Attendee",
+                                              related_name="events_attending")
     slug = models.SlugField(max_length=250)
 
     creator = models.ForeignKey(User)
@@ -94,7 +101,6 @@ class Event(models.Model):
     visible_events = EventShowManager()
 
     class Meta:
-        unique_together = ('group', 'name')
         ordering = ['starts_at']
 
     def get_absolute_url(self):
@@ -113,19 +119,16 @@ class Event(models.Model):
         return "%s" % self.name
 
 
-RSVP_CHOICES = (('yes', 'Yes'), ('no', 'No'), ('maybe', 'May Be'))
-
-
 class Attendee(models.Model):
     "People who have RSVPed to events"
+    RSVP_CHOICES = (('yes', 'Yes'), ('no', 'No'), ('maybe', 'May Be'))
     user = models.ForeignKey(User)
     event = models.ForeignKey(Event)
     rsvped_on = models.DateTimeField()
     rsvp_status = models.CharField(verbose_name="RSVP Status",
                                    choices=RSVP_CHOICES,
                                    max_length=5,
-                                   blank=True,
-                                   null=True)
+                                   default="yes")
 
     def __unicode__(self):
         return "%s - %s" % (self.user.first_name, self.event.name)
@@ -134,3 +137,8 @@ class Attendee(models.Model):
 def get_unjoined_groups(user):
     user_unjoined_groups = TavernGroup.objects.exclude(members=user)
     return user_unjoined_groups
+
+
+def get_groups(user):
+    user_groups = TavernGroup.objects.filter(members=user)
+    return user_groups

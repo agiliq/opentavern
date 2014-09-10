@@ -30,8 +30,7 @@ def index(request, template='tavern/home.html'):
         joined_groups = request.user.tavern_groups.all()
         unjoined_groups = list(set(all_groups) - set(joined_groups))
         upcoming_events = Event.visible_events.upcoming()
-        events = Attendee.objects.filter(user=request.user)
-        events_rsvped = [event.event for event in events]
+        events_rsvped = request.user.events_attending.all()
 
         context = {'joined_groups': joined_groups,
                    'unjoined_groups': unjoined_groups,
@@ -129,9 +128,7 @@ class EventDetail(UpcomingEventsMixin, DetailView):
     template_name = "tavern/event_details.html"
     context_object_name = "event"
     model = Event
-
-    def get_queryset(self, **kwargs):
-        return self.model.visible_events.all()
+    queryset = Event.visible_events.all()
 
     def get_context_data(self, **kwargs):
         context = super(EventDetail, self).get_context_data(**kwargs)
