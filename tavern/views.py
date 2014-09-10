@@ -9,7 +9,6 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from django.views.generic import DetailView
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.views.generic.detail import SingleObjectMixin
-from django.http import Http404
 
 from guardian.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
@@ -129,13 +128,7 @@ class EventDetail(UpcomingEventsMixin, DetailView):
     template_name = "tavern/event_details.html"
     context_object_name = "event"
     model = Event
-
-    def get(self, request, *args, **kwargs):
-        event_slug = self.kwargs['slug']
-        event = get_object_or_404(Event, slug=event_slug)
-        if not event.show:
-            raise Http404
-        return super(EventDetail, self).get(request, *args, **kwargs)
+    queryset = Event.visible_events.all()
 
     def get_context_data(self, **kwargs):
         context = super(EventDetail, self).get_context_data(**kwargs)
