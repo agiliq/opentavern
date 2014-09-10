@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "tavern/base.html" %}
 {% load guardian_tags %}
 
 {% block content %}
@@ -45,9 +45,9 @@
         </div>
         <button class="btn btn-danger" data-toggle="modal" data-target="#deleteGroupModal">Delete</button>
         {% endif %}
-    {% include 'past_events.html' %}
+    {% include 'tavern/past_events.html' %}
 
-    {% include 'upcoming_events.html' %}
+    {% include 'tavern/upcoming_events.html' %}
     
 {% endblock content %}
 

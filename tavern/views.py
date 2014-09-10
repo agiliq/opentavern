@@ -23,15 +23,14 @@ def today_date():
     return today
 
 
-def index(request, template='home.html'):
+def index(request, template='tavern/home.html'):
     """ index page """
     all_groups = TavernGroup.objects.all()
     if request.user.is_authenticated():
         joined_groups = request.user.tavern_groups.all()
         unjoined_groups = list(set(all_groups) - set(joined_groups))
-        upcoming_events = Event.objects.filter(starts_at__gt=today_date())
-        events = Attendee.objects.filter(user=request.user)
-        events_rsvped = [event.event for event in events]
+        upcoming_events = Event.visible_events.upcoming()
+        events_rsvped = request.user.events_attending.all()
 
         context = {'joined_groups': joined_groups,
                    'unjoined_groups': unjoined_groups,
@@ -95,19 +94,19 @@ class UpcomingEventsMixin(object):
     """ Add upcoming events to the view """
     def get_context_data(self, **kwargs):
         context = super(UpcomingEventsMixin, self).get_context_data(**kwargs)
-        context['upcoming_events'] = Event.objects.filter(starts_at__gt=today_date())
+        context['upcoming_events'] = Event.visible_events.upcoming()
         return context
 
 
 class GroupDetail(UpcomingEventsMixin, DetailView):
     """ Group details Page """
-    template_name = "group_details.html"
+    template_name = "tavern/group_details.html"
     context_object_name = "group"
     model = TavernGroup
 
     def get_context_data(self, **kwargs):
         context = super(GroupDetail, self).get_context_data(**kwargs)
-        context['past_events'] = Event.objects.filter(starts_at__lt=today_date())
+        context['past_events'] = Event.visible_events.past()
 
         tavern_group = context['group']
         try:
@@ -126,12 +125,12 @@ class GroupDetail(UpcomingEventsMixin, DetailView):
 
 class EventDetail(UpcomingEventsMixin, DetailView):
     """ Give details about an event and its attendees"""
-    template_name = "event_details.html"
+    template_name = "tavern/event_details.html"
     context_object_name = "event"
     model = Event
 
     def get_queryset(self, **kwargs):
-        return self.model.objects.all()
+        return self.model.visible_events.all()
 
     def get_context_data(self, **kwargs):
         context = super(EventDetail, self).get_context_data(**kwargs)
@@ -160,7 +159,7 @@ class GroupCreate(LoginRequiredMixin, CreateView):
     """ Create new group """
     form_class = CreateGroupForm
     model = TavernGroup
-    template_name = "group_form.html"
+    template_name = "tavern/group_form.html"
 
     def form_valid(self, form):
         form.instance.creator = self.request.user
@@ -171,7 +170,7 @@ class GroupUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     """ Updates a group """
     model = TavernGroup
     form_class = CreateGroupForm
-    template_name = 'group_form.html'
+    template_name = 'tavern/group_form.html'
     permission_required = 'tavern.change_taverngroup'
     render_403 = True
     return_403 = True
@@ -188,7 +187,7 @@ class GroupDelete(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
 
 class EditOrganizers(LoginRequiredMixin, PermissionRequiredMixin, SingleObjectMixin, MultiFormsView):
-    template_name = "edit_organizers.html"
+    template_name = "tavern/edit_organizers.html"
     form_classes = {'add': AddOrganizerForm,
                     'remove': RemoveOrganizerForm
                     }
@@ -226,7 +225,7 @@ class EventCreate(LoginRequiredMixin, CreateView):
     """ Creates new Event """
     form_class = CreateEventForm
     model = Event
-    template_name = "event_form.html"
+    template_name = "tavern/event_form.html"
 
     def get_form_kwargs(self):
         kwargs = super(EventCreate, self).get_form_kwargs()
@@ -242,7 +241,7 @@ class EventUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     """ Update an Event """
     model = Event
     form_class = UpdateEventForm
-    template_name = 'event_form.html'
+    template_name = 'tavern/event_form.html'
     permission_required = 'tavern.change_event'
     render_403 = True
     return_403 = True
