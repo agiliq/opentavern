@@ -61,6 +61,9 @@ class Membership(models.Model):
                                      related_name='memberships')
     join_date = models.DateTimeField()
 
+    class Meta:
+        unique_together = ['user', 'tavern_group']
+
     def __unicode__(self):
         return "%s - %s" % (self.user.username, self.tavern_group.name)
 
@@ -98,7 +101,6 @@ class Event(models.Model):
     visible_events = EventShowManager()
 
     class Meta:
-        unique_together = ('group', 'name')
         ordering = ['starts_at']
 
     def get_absolute_url(self):
