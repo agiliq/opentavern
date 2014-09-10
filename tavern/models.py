@@ -3,13 +3,14 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.urlresolvers import reverse
+from django.shortcuts import get_object_or_404
+from django.template.defaultfilters import slugify
 
 from .slugify import unique_slugify
 
-
 class NonEmptyGroupManager(models.Manager):
 
-    def get_queryset(self):
+    def get_non_empty_users(self):
         """
         Filters out tavern groups which contain no members
         """
@@ -94,20 +95,33 @@ class Event(models.Model):
     visible_events = EventShowManager()
 
     class Meta:
-        unique_together = ('group', 'name')
         ordering = ['starts_at']
 
     def get_absolute_url(self):
-        return reverse("tavern_event_details", kwargs={"slug": self.slug})
+        return reverse("tavern_event_details", kwargs={"slug": self.slug,
+                                                       "group": self.group.slug})
 
     def save(self, *args, **kwargs):
-        unique_slugify(self, self.name)
+        event_slug = slugify(self.name)
+        group = self.group
+        group_events = group.event_set.filter(slug=event_slug)
+        if group_events:
+            count = len(group_events) + 1
+            uniq_slug = event_slug + "-%s" % count
+            self.slug = uniq_slug
+        else:
+            self.slug = slugify(self.name)
         super(Event, self).save(*args, **kwargs)
         Attendee.objects.get_or_create(
             user=self.creator,
             event=self,
             defaults={'rsvped_on': timezone.now(),
                       'rsvp_status': 'yes'})
+
+    def slug_create(self, original_slug, next=1):
+        if not next == 1:
+            original_slug += "%s" % (i,)
+        return original_slug
 
     def __unicode__(self):
         return "%s" % self.name
@@ -129,3 +143,9 @@ class Attendee(models.Model):
 
     def __unicode__(self):
         return "%s - %s" % (self.user.first_name, self.event.name)
+
+
+def get_unjoined_groups(username):
+    user = get_object_or_404(User, username=username)
+    user_unjoined_groups = TavernGroup.objects.exclude(members=user)
+    return user_unjoined_groups
