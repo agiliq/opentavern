@@ -8,6 +8,7 @@ from django.template.defaultfilters import slugify
 
 from .slugify import unique_slugify
 
+
 class NonEmptyGroupManager(models.Manager):
 
     def get_non_empty_users(self):
@@ -117,11 +118,6 @@ class Event(models.Model):
             event=self,
             defaults={'rsvped_on': timezone.now(),
                       'rsvp_status': 'yes'})
-
-    def slug_create(self, original_slug, next=1):
-        if not next == 1:
-            original_slug += "%s" % (i,)
-        return original_slug
 
     def __unicode__(self):
         return "%s" % self.name

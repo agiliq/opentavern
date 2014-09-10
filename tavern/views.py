@@ -159,17 +159,15 @@ class EventDetail(UpcomingEventsMixin, DetailView):
         context['editable'] = event.starts_at > timezone.now()
         return context
 
-
     def get_object(self, **kwargs):
         group_name = self.kwargs['group']
         event_name = self.kwargs['slug']
         try:
-            
             group = TavernGroup.objects.get(slug=group_name)
             event = group.event_set.get(slug=event_name)
         except Event.DoesNotExist:
             raise Http404
-        
+
 
 class GroupCreate(LoginRequiredMixin, CreateView):
     """ Create new group """
