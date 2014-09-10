@@ -132,3 +132,10 @@ class Attendee(models.Model):
 
     def __unicode__(self):
         return "%s - %s" % (self.user.first_name, self.event.name)
+
+
+#Helper methods
+
+def get_groups(user):
+    user_groups = TavernGroup.objects.filter(members=user)
+    return user_groups
