@@ -10,7 +10,7 @@ from .slugify import unique_slugify
 
 class NonEmptyGroupManager(models.Manager):
 
-    def get_queryset(self):
+    def get_non_empty_users(self):
         """
         Filters out tavern groups which contain no members
         """
@@ -104,10 +104,19 @@ class Event(models.Model):
         ordering = ['starts_at']
 
     def get_absolute_url(self):
-        return reverse("tavern_event_details", kwargs={"slug": self.slug})
+        return reverse("tavern_event_details", kwargs={"slug": self.slug,
+                                                       "group": self.group.slug})
 
     def save(self, *args, **kwargs):
-        unique_slugify(self, self.name)
+        event_slug = slugify(self.name)
+        group = self.group
+        group_events = group.event_set.filter(slug=event_slug)
+        if group_events:
+            count = len(group_events) + 1
+            uniq_slug = event_slug + "-%s" % count
+            self.slug = uniq_slug
+        else:
+            self.slug = slugify(self.name)
         super(Event, self).save(*args, **kwargs)
         Attendee.objects.get_or_create(
             user=self.creator,

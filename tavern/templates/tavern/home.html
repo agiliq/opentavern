@@ -45,7 +45,7 @@
         <h1> Events I rsvped </h1>
         <ul class="list-group">
     {% for event in events_rsvped %}
-        <li class="list-group-item"><a href="{% url 'tavern_event_details' event.slug %}">{{ event.name }}</a></li>
+        <li class="list-group-item"><a href="{% url 'tavern_event_details' event.group.slug event.slug %}">{{ event.name }}</a></li>
         {% empty %}
         <li class="list-group-item">No upcoming events</li>
     {% endfor %}
