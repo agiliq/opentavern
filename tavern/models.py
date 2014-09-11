@@ -10,9 +10,9 @@ from .slugify import unique_slugify
 
 class NonEmptyGroupManager(models.Manager):
 
-    def get_queryset(self):
+    def non_empty_groups(self):
         """
-        Filters out tavern groups which contain no members
+        Filters out tavern groups which contain atlease one member
         """
         return super(NonEmptyGroupManager, self).get_queryset().exclude(members=None)
 
@@ -35,8 +35,7 @@ class TavernGroup(models.Model):
                                      related_name="tavern_groups")
     slug = models.SlugField(max_length=50)
 
-    objects = models.Manager()
-    with_members = NonEmptyGroupManager()
+    objects = NonEmptyGroupManager()
 
     def get_absolute_url(self):
         return reverse("tavern_group_details", kwargs={"slug": self.slug})
@@ -91,7 +90,7 @@ class Event(models.Model):
     location = models.TextField(null=True, blank=True)
 
     attendees = models.ManyToManyField(User, through="Attendee",
-                                              related_name="events_attending")
+                                       related_name="events_attending")
     slug = models.SlugField(max_length=250)
 
     creator = models.ForeignKey(User)
