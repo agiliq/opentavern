@@ -8,7 +8,7 @@ from django.template.defaultfilters import slugify
 
 class NonEmptyGroupManager(models.Manager):
 
-    def get_non_empty_users(self):
+    def get_queryset(self):
         """
         Filters out tavern groups which contain no members
         """
