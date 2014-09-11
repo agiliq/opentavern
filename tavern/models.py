@@ -8,13 +8,13 @@ from django.template.defaultfilters import slugify
 from .slugify import unique_slugify
 
 
-class NonEmptyGroupManager(models.Manager):
+class TavernGroupManager(models.Manager):
 
     def non_empty_groups(self):
         """
-        Filters out tavern groups which contain atlease one member
+        Excludes groups which does not contain any member
         """
-        return super(NonEmptyGroupManager, self).get_queryset().exclude(members=None)
+        return super(TavernGroupManager, self).all().exclude(members=None)
 
 
 class TavernGroup(models.Model):
@@ -35,7 +35,7 @@ class TavernGroup(models.Model):
                                      related_name="tavern_groups")
     slug = models.SlugField(max_length=50)
 
-    objects = NonEmptyGroupManager()
+    objects = TavernGroupManager()
 
     def get_absolute_url(self):
         return reverse("tavern_group_details", kwargs={"slug": self.slug})
