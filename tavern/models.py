@@ -5,8 +5,6 @@ from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 
-from .slugify import unique_slugify
-
 
 class NonEmptyGroupManager(models.Manager):
 
@@ -91,7 +89,7 @@ class Event(models.Model):
     location = models.TextField(null=True, blank=True)
 
     attendees = models.ManyToManyField(User, through="Attendee",
-                                              related_name="events_attending")
+                                       related_name="events_attending")
     slug = models.SlugField(max_length=250)
 
     creator = models.ForeignKey(User)
@@ -151,4 +149,3 @@ def get_unjoined_groups(user):
 def get_groups(user):
     user_groups = TavernGroup.objects.filter(members=user)
     return user_groups
-
