@@ -103,10 +103,14 @@ class Event(models.Model):
         ordering = ['starts_at']
 
     def get_absolute_url(self):
-        return reverse("tavern_event_details", kwargs={"slug": self.slug})
+        return reverse("tavern_event_details", kwargs={"slug": self.slug,
+                                                       "group": self.group.slug})
 
     def save(self, *args, **kwargs):
-        unique_slugify(self, self.name)
+        # This event's slug should not match a slug of any
+        # existing event in the same group.
+        slug_queryset = self.group.event_set.all()
+        unique_slugify(self, self.name, queryset=slug_queryset)
         super(Event, self).save(*args, **kwargs)
         Attendee.objects.get_or_create(
             user=self.creator,
