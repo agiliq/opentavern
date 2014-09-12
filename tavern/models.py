@@ -5,6 +5,8 @@ from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 
+from .slugify import unique_slugify
+
 
 class NonEmptyGroupManager(models.Manager):
 
@@ -106,15 +108,8 @@ class Event(models.Model):
                                                        "group": self.group.slug})
 
     def save(self, *args, **kwargs):
-        event_slug = slugify(self.name)
-        group = self.group
-        group_events = group.event_set.filter(slug=event_slug)
-        if group_events:
-            count = len(group_events) + 1
-            uniq_slug = event_slug + "-%s" % count
-            self.slug = uniq_slug
-        else:
-            self.slug = slugify(self.name)
+        slug_queryset = self.group.event_set.all()
+        unique_slugify(self, self.name, queryset=slug_queryset)
         super(Event, self).save(*args, **kwargs)
         Attendee.objects.get_or_create(
             user=self.creator,
