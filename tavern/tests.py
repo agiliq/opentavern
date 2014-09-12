@@ -153,16 +153,19 @@ class TestViews(TestCase):
 
         event = create_and_get_event(self.user)
         response = self.client.get(reverse("tavern_event_details",
-                                           kwargs={'slug': event.slug}))
+                                           kwargs={'slug': event.slug,
+                                                   'group': event.group.slug}))
         self.assertEqual(response.status_code, 200)
 
         response = self.client.get(reverse("tavern_event_details",
-                                           kwargs={'slug': 'incorrect_slug'}))
+                                           kwargs={'slug': 'incorrect_slug',
+                                                   'group': event.group.slug}))
         self.assertEqual(response.status_code, 404)
         event.show = False
         event.save()
         response = self.client.get(reverse("tavern_event_details",
-                                           kwargs={'slug': event.slug}))
+                                           kwargs={'slug': 'incorrect_slug',
+                                                   'group': event.group.slug}))
         self.assertEqual(response.status_code, 404)
 
     def test_tavern_toggle_member(self):
@@ -220,7 +223,8 @@ class TestViews(TestCase):
              'ends_at': '2014-07-04 20:25',
              'location': 'Delhi'})
         self.assertRedirects(response,
-                             reverse("tavern_event_details", kwargs={'slug': 'new-name'}),
+                             reverse("tavern_event_details", kwargs={'slug': 'new-name',
+                                                                     'group': event.group.slug}),
                              status_code=302)
 
     def test_event_delete(self):
@@ -248,7 +252,8 @@ class TestViews(TestCase):
         response = self.client.post(reverse("delete_rsvp",
                                             kwargs={'pk': attendee.pk}), follow=True)
         self.assertRedirects(response,
-                             reverse("tavern_event_details", kwargs={'slug': event.slug}),
+                             reverse("tavern_event_details", kwargs={'slug': event.slug,
+                                                                     'group': event.group.slug}),
                              status_code=302)
 
     def test_edit_organizers(self):
