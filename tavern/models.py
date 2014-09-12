@@ -108,6 +108,8 @@ class Event(models.Model):
                                                        "group": self.group.slug})
 
     def save(self, *args, **kwargs):
+        # This event's slug should not match a slug of any
+        # existing event in the same group.
         slug_queryset = self.group.event_set.all()
         unique_slugify(self, self.name, queryset=slug_queryset)
         super(Event, self).save(*args, **kwargs)
