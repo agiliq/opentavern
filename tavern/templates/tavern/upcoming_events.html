@@ -2,7 +2,7 @@
     <h1> Upcoming Events</h1>
     <ul class="list-group">
     {% for event in upcoming_events %}
-        <li class="list-group-item"><a href="{% url 'tavern_event_details' event.slug %}">{{ event.name }}</a></li>
+        <li class="list-group-item"><a href="{% url 'tavern_event_details' event.group.slug event.slug %}">{{ event.name }}</a></li>
         {% empty %}
         <li class="list-group-item">No upcoming events</li>
     {% endfor %}

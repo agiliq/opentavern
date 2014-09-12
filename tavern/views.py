@@ -3,7 +3,8 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, \
+    Http404
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.views.generic import DetailView
@@ -132,7 +133,10 @@ class EventDetail(UpcomingEventsMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(EventDetail, self).get_context_data(**kwargs)
-        event = context['event']
+        event_name = self.kwargs['slug']
+        group_name = self.kwargs['group']
+        group = TavernGroup.objects.get(slug=group_name)
+        event = group.event_set.get(slug=event_name)
         try:
             attendee = Attendee.objects.get(user=self.request.user,
                                             event=event)
@@ -151,6 +155,15 @@ class EventDetail(UpcomingEventsMixin, DetailView):
                                                              rsvp_status="yes")
         context['editable'] = event.starts_at > timezone.now()
         return context
+
+    def get_object(self, **kwargs):
+        group_name = self.kwargs['group']
+        event_name = self.kwargs['slug']
+        try:
+            group = TavernGroup.objects.get(slug=group_name)
+            event = group.event_set.get(slug=event_name)
+        except Event.DoesNotExist:
+            raise Http404
 
 
 class GroupCreate(LoginRequiredMixin, CreateView):
@@ -260,7 +273,8 @@ class RsvpDelete(LoginRequiredMixin, DeleteView):
     model = Attendee
 
     def get_success_url(self, **kwargs):
-        return reverse("tavern_event_details", kwargs={"slug": self.object.event.slug})
+        return reverse("tavern_event_details", kwargs={"slug": self.object.event.slug,
+                                                       "group": self.object.event.group.slug})
 
 
 tavern_group_update = GroupUpdate.as_view()
