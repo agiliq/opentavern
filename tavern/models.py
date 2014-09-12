@@ -91,7 +91,7 @@ class Event(models.Model):
     location = models.TextField(null=True, blank=True)
 
     attendees = models.ManyToManyField(User, through="Attendee",
-                                              related_name="events_attending")
+                                       related_name="events_attending")
     slug = models.SlugField(max_length=250)
 
     creator = models.ForeignKey(User)
@@ -142,7 +142,3 @@ def get_unjoined_groups(user):
 def get_groups(user):
     user_groups = TavernGroup.objects.filter(members=user)
     return user_groups
-
-def get_users_attending_event(event):
-    users_attending_event = Attendee.objects.filter(user=event)
-    return users_attending_event
