@@ -12,14 +12,15 @@ class UserUnjoinedTavernGroup(template.Node):
         self.user = template.Variable(user)
         self.var_name = var_name
 
-    def render(self,context):
+    def render(self, context):
         user = self.user.resolve(context)
         user_unjoined_groups = get_unjoined_groups(user)
         context[self.var_name] = user_unjoined_groups
         return ''
 
+
 @register.tag
-def get_user_tavern_unjoined_groups(parser,token):
+def get_user_tavern_unjoined_groups(parser, token):
     tag_name, arg = token.contents.split(None, 1)
     m = re.search(r'for (\w+.\w+) as (\w+)', arg)
     user, var_name = m.groups()
