@@ -72,6 +72,7 @@
     {% if editable %}
         {% get_obj_perms request.user for event as "event_perms" %}
         {% if "change_event" in event_perms %}
+
         <a class="btn btn-default" href="{% url 'tavern_event_update' event.slug %}">Edit Event</a>
         {% endif %}
 
