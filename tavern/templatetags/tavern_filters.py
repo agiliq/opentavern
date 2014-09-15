@@ -4,6 +4,7 @@ from django import template
 
 from tavern.models import TavernGroup
 from tavern.models import get_groups
+from tavern.models import get_rsvp_yes_events
 
 register = template.Library()
 
@@ -42,8 +43,7 @@ class UserTavernRsvpEvents(UserTemplateTagMixin, template.Node):
 
     def render(self, context):
         user = self.user.resolve(context)
-        rsvp_yes_events = user.attendee_set.filter(rsvp_status='yes')
-        events = [event.event for event in rsvp_yes_events]
+        events = get_rsvp_yes_events(user)
         context[self.var_name] = events
         return ''
 
