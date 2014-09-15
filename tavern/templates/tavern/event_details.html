@@ -62,7 +62,9 @@
     {% endif %}
     <hr/>
     <h1> Event Attendees </h1>
-        
+    <ol>
+
+        {% for attendee in event_attendees %}
             <li>{{ attendee.user.first_name }}</li>
             {% empty %}
 
