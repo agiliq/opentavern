@@ -1,8 +1,7 @@
 import re
 
 from django import template
-
-from tavern.models import Attendee
+from tavern.models import get_rsvped_no_events
 
 register = template.Library()
 
@@ -14,7 +13,7 @@ class TavernEventNoRsvped(template.Node):
 
     def render(self, context):
         event = self.event.resolve(context)
-        Events_for_rsvped_no = event.attendee_set.filter(rsvp_status="no")
+        Events_for_rsvped_no = get_rsvped_no_events(event)
         context[self.var_name] = Events_for_rsvped_no
         return ''
 

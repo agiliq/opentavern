@@ -145,3 +145,9 @@ def get_unjoined_groups(user):
 def get_groups(user):
     user_groups = TavernGroup.objects.filter(members=user)
     return user_groups
+
+
+def get_rsvped_no_events(event):
+    event = Event.objects.all()[0]
+    rsvped = event.creator.attendee_set.filter(rsvp_status="no")
+    return rsvped
