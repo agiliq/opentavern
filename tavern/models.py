@@ -134,7 +134,8 @@ class Attendee(models.Model):
                                    default="yes")
 
     def __unicode__(self):
-        return "%s - %s" % (self.user.first_name, self.event.name)
+        return "%s - %s - %s" % (self.user.first_name, self.event.name,
+                                 self.rsvp_status)
 
 
 def get_unjoined_groups(user):
