@@ -4,8 +4,8 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
-from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.db.models.signals import post_save
 
 from .slugify import unique_slugify
 
@@ -45,6 +45,10 @@ class TavernGroup(models.Model):
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
         super(TavernGroup, self).save(*args, **kwargs)
+        Membership.objects.get_or_create(
+            user=self.creator,
+            tavern_group=self,
+            defaults={'join_date': timezone.now()})
 
     def __unicode__(self):
         return "%s" % self.name
@@ -132,7 +136,8 @@ class Attendee(models.Model):
                                    default="yes")
 
     def __unicode__(self):
-        return "%s - %s" % (self.user.first_name, self.event.name)
+        return "%s - %s - %s" % (self.user.first_name, self.event.name,
+                                 self.rsvp_status)
 
 
 def get_unjoined_groups(user):

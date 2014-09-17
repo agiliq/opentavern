@@ -57,7 +57,7 @@ class TestModels(TestCase):
                                            rsvped_on=datetime.now(),
                                            rsvp_status="yes")
         self.assertEqual(Attendee.objects.count(), 2)
-        self.assertEqual(attendee.__unicode__(), u' - Tavern Event')
+        self.assertEqual(attendee.__unicode__(), u' - Tavern Event - yes')
 
     def test_event_permisssions(self):
         """Test that creator of an event have change and delete

@@ -164,7 +164,6 @@ class EventDetail(UpcomingEventsMixin, DetailView):
             event = group.event_set.get(slug=event_name)
         except Event.DoesNotExist:
             raise Http404
-        return event
 
 
 class GroupCreate(LoginRequiredMixin, CreateView):
