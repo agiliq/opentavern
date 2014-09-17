@@ -1,5 +1,5 @@
 import re
-
+import pdb
 from django import template
 
 from tavern.models import TavernGroup
@@ -50,9 +50,10 @@ class UserTavernRsvpEvents(UserTemplateTagMixin, template.Node):
 
 @register.tag
 def get_user_tavern_groups(parser, token):
-    tag_name, arg = token.contents.split(None, 1)
-    m = re.search(r'for (\w+.\w+) as (\w+)', arg)
-    user, var_name = m.groups()
+    tag_elements = token.split_contents()
+    var_name = tag_elements[-1]
+    arg_index = tag_elements.index('request.user')
+    user = tag_elements[arg_index]
     return UserTavernGroups(user, var_name)
 
 
