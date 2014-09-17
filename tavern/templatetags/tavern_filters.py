@@ -59,9 +59,8 @@ def get_user_tavern_groups(parser, token):
 
 @register.tag
 def get_all_tavern_groups(parser, token):
-    tag_name, arg = token.contents.split(None, 1)
-    m = re.search(r'as (\w+)', arg)
-    var_name = m.groups()[0]
+    tag_elements = token.split_contents()
+    var_name = tag_elements[-1]
     return AllTavernGroups(var_name)
 
 
