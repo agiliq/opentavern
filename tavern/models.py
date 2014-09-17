@@ -151,7 +151,7 @@ def group_membership_create(sender, **kwargs):
     if kwargs["created"]:
         user_instance = User.objects.filter(created_groups__name=model_instance)[0]
         membership = Membership.objects.get_or_create(tavern_group=model_instance, join_date=timezone.now(), user=user_instance)
-        return reverse('tavern_group_details', kwargs={"slug": model_instance})
+        return reverse('tavern_group_details', kwargs={"slug": model_instance.slug})
 
 
 @receiver(post_save, sender=Event)
@@ -161,9 +161,13 @@ def event_attendee_create(sender, **kwargs):
     if kwargs["created"]:
         user_instance = User.objects.filter(event=model_instance)[0]
         print user_instance
-        attendee = Attendee.objects.get_or_create(user=user_instance, event=model_instance, defaults={'rsvped_on':timezone.now(),'rsvp_status': 'yes'})
-        return reverse("tavern_event_details", kwargs={"slug": model_instance,
-                                                       "group": model_instance.group})
+        attendee = Attendee.objects.get_or_create(user=user_instance,
+                                                  event=model_instance,
+                                                  defaults={'rsvped_on': timezone.now(), 'rsvp_status': 'yes'}
+                                                  )
+        print attendee
+    return reverse("tavern_event_details", kwargs={"slug": model_instance.slug,
+                                                   "group": model_instance.group.slug})
 
 post_save.connect(group_membership_create, sender=TavernGroup)
 post_save.connect(event_attendee_create, sender=Event)
