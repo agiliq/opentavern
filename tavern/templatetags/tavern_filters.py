@@ -48,6 +48,8 @@ class UserTavernRsvpEvents(UserTemplateTagMixin, template.Node):
 
 @register.tag
 def get_user_tavern_groups(parser, token):
+    """ returns all the groups in which is a member
+    {% get_user_tavern_groups for request.user as user_tavern_groups %}"""
     tag_elements = token.split_contents()
     var_name = tag_elements[-1]
     arg_index = tag_elements.index('request.user')
@@ -57,6 +59,8 @@ def get_user_tavern_groups(parser, token):
 
 @register.tag
 def get_all_tavern_groups(parser, token):
+    """returns all the tavern groups
+    {% get_all_tavern_groups as tavern_groups %}"""
     tag_elements = token.split_contents()
     var_name = tag_elements[-1]
     return AllTavernGroups(var_name)
@@ -64,6 +68,8 @@ def get_all_tavern_groups(parser, token):
 
 @register.tag
 def get_user_tavern_rsvp_yes_events(parser, token):
+    """returns all the events in which user has assigned rsvp as yes
+    {% get_user_tavern_rsvp_yes_events for request.user as attending_events %} """
     tag_elements = token.split_contents()
     var_name = tag_elements[-1]
     arg_index = tag_elements.index('request.user')
