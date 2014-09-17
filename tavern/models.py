@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from .slugify import unique_slugify
 
@@ -43,10 +45,6 @@ class TavernGroup(models.Model):
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
         super(TavernGroup, self).save(*args, **kwargs)
-        Membership.objects.get_or_create(
-            user=self.creator,
-            tavern_group=self,
-            defaults={'join_date': timezone.now()})
 
     def __unicode__(self):
         return "%s" % self.name
@@ -145,3 +143,14 @@ def get_unjoined_groups(user):
 def get_groups(user):
     user_groups = TavernGroup.objects.filter(members=user)
     return user_groups
+
+
+@receiver(post_save, sender=TavernGroup)
+def group_create(sender, **kwargs):
+    model_instance = kwargs["instance"]
+    if kwargs["created"]:
+        user_instance = User.objects.filter(created_groups__name=model_instance)[0]
+        membership = Membership.objects.get_or_create(tavern_group=model_instance, join_date=timezone.now(), user=user_instance)
+        return reverse('tavern_group_details', kwargs={"slug": model_instance})
+
+post_save.connect(group_create, sender=TavernGroup)
