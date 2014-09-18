@@ -28,7 +28,7 @@ def signup(request, template='signup.html'):
         form = UserCreateForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.is_active = False
+            user.is_active = True
             user.save()
             messages.success(request, 'You are successfully registered')
             context = {'form': form}
