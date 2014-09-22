@@ -3,7 +3,7 @@ from django import template
 from tavern.models import TavernGroup
 from tavern.models import get_groups
 from tavern.models import get_rsvp_yes_events
-
+import pdb
 register = template.Library()
 
 
@@ -50,11 +50,12 @@ class UserTavernRsvpEvents(UserTemplateTagMixin, template.Node):
 def get_user_tavern_groups(parser, token):
     """ returns all the groups in which is a member
     {% get_user_tavern_groups for request.user as user_tavern_groups %}"""
-    tag_elements = token.split_contents()
-    var_name = tag_elements[-1]
-    arg_index = tag_elements.index('request.user')
-    user = tag_elements[arg_index]
-    return UserTavernGroups(user, var_name)
+    try:
+        tag_name, for_contxt, user, as_contxt, var = token.split_contents()
+    except ValueError:
+        raise template.TemplateSyntaxError(("%r tag is not correct Ex: "
+            "get_user_tavern_groups for user as tavern_groups") % token.split_contents()[0])
+    return UserTavernGroups(user, var)
 
 
 @register.tag
