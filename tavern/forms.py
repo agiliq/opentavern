@@ -54,10 +54,18 @@ class UpdateEventForm(forms.ModelForm):
 
 class UserCreateForm(UserCreationForm):
     email = forms.EmailField(required=True)
+    MIN_LENGTH = 6
 
     class Meta:
         model = User
         fields = ('username', 'email', 'password1', 'password2')
+
+    def clean_password1(self):
+        cleaned_data = super(UserCreateForm, self).clean()
+        password1 = self.cleaned_data.get('password1')
+        if len(password1) < self.MIN_LENGTH:
+            raise forms.ValidationError("Password must be atleast %d character long." % self.MIN_LENGTH)
+        return cleaned_data['password1']
 
     def save(self, commit=True):
         user = super(UserCreateForm, self).save(commit=False)
