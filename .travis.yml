@@ -6,6 +6,7 @@ python:
 install:
     - pip install --use-mirrors -r requirements/local.txt
     - pip install coverage coveralls
+    - pip install dj-static==0.0.5
 
 before_script:
   - ./lint.sh
