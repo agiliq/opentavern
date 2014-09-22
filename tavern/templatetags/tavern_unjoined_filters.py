@@ -1,5 +1,4 @@
 from django import template
-from django.contrib.auth.models import User
 
 from tavern.models import get_unjoined_groups
 
@@ -30,6 +29,5 @@ def get_user_tavern_unjoined_groups(parser, token):
         if not (user in ('request.user', 'user')):
             raise template.TemplateSyntaxError("%r variable is not the user" % token.contents.split()[2])
     except ValueError:
-        raise template.TemplateSyntaxError("%r tag is invalid. use "
-            "get_user_tavern_unjoined_groups for request.user/user in user_tavern_unjoined_groups" % token.contents.split()[0])
+        raise template.TemplateSyntaxError("%r tag is invalid. use 'get_user_tavern_unjoined_groups for request.user/user in user_tavern_unjoined_groups'" % token.contents.split()[0])
     return UserUnjoinedTavernGroup(user, var_name)
