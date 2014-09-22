@@ -1,4 +1,5 @@
 from django import template
+from django.contrib.auth.models import User
 
 from tavern.models import get_unjoined_groups
 
@@ -22,8 +23,13 @@ class UserUnjoinedTavernGroup(template.Node):
 @register.tag
 def get_user_tavern_unjoined_groups(parser, token):
     """gets all unjoined groups for a user"""
-    args = token.split_contents()
-    var_name = args[-0]
-    arg_variable = args.index('request.user')
-    user = args[arg_variable]
+    try:
+        tag_name, for_keyword, user, as_keyword, var_name = token.split_contents()
+        user = token.split_contents()[2]
+        print user
+        if not (user in ('request.user', 'user')):
+            raise template.TemplateSyntaxError("%r variable is not the user" % token.contents.split()[2])
+    except ValueError:
+        raise template.TemplateSyntaxError("%r tag is invalid. use "
+            "get_user_tavern_unjoined_groups for request.user/user in user_tavern_unjoined_groups" % token.contents.split()[0])
     return UserUnjoinedTavernGroup(user, var_name)
