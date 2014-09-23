@@ -24,10 +24,7 @@ def get_user_tavern_unjoined_groups(parser, token):
     """gets all unjoined groups for a user"""
     try:
         tag_name, for_keyword, user, as_keyword, var_name = token.split_contents()
-        user = token.split_contents()[2]
-        print user
-        if not (user in ('request.user', 'user')):
-            raise template.TemplateSyntaxError("%r variable is not the user" % token.contents.split()[2])
     except ValueError:
         raise template.TemplateSyntaxError("%r tag is invalid. use 'get_user_tavern_unjoined_groups for request.user/user in user_tavern_unjoined_groups'" % token.contents.split()[0])
+    user = token.split_contents()[2]
     return UserUnjoinedTavernGroup(user, var_name)
