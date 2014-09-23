@@ -65,9 +65,12 @@ def get_user_tavern_groups(parser, token):
 def get_all_tavern_groups(parser, token):
     """returns all the tavern groups
     {% get_all_tavern_groups as tavern_groups %}"""
-    tag_elements = token.split_contents()
-    var_name = tag_elements[-1]
-    return AllTavernGroups(var_name)
+    try:
+        tag_name, as_contxt, variable = token.split_contents()
+    except:
+        raise template.TemplateSyntaxError(("Invalid template tag %r."
+            " Ex: get_all_tavern_groups as tavern_groups") % token.split_contents()[0])
+    return AllTavernGroups(variable)
 
 
 @register.tag
