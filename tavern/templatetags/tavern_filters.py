@@ -19,6 +19,9 @@ class UserTavernGroups(UserTemplateTagMixin, template.Node):
 
     def render(self, context):
         user = self.user.resolve(context)
+        if not user.__class__.__name__ == "User":
+            raise template.TemplateSyntaxError("Invalid arguments passed."
+                        "Argument should be an instance of User")
         user_groups = get_groups(user)
         context[self.var_name] = user_groups
         return ''
