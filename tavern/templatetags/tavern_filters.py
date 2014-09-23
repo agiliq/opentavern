@@ -3,7 +3,6 @@ from django import template
 from tavern.models import TavernGroup
 from tavern.models import get_groups
 from tavern.models import get_rsvp_yes_events
-import pdb
 register = template.Library()
 
 
@@ -44,6 +43,9 @@ class UserTavernRsvpEvents(UserTemplateTagMixin, template.Node):
 
     def render(self, context):
         user = self.user.resolve(context)
+        if not user.__class__.__name__ == 'User':
+            raise template.TemplateSyntaxError("Invalid argument type passed."
+                " Argument should be an instance of user")
         events = get_rsvp_yes_events(user)
         context[self.var_name] = events
         return ''
@@ -76,9 +78,12 @@ def get_all_tavern_groups(parser, token):
 @register.tag
 def get_user_tavern_rsvp_yes_events(parser, token):
     """returns all the events in which user has assigned rsvp as yes
-    {% get_user_tavern_rsvp_yes_events for request.user as attending_events %} """
-    tag_elements = token.split_contents()
-    var_name = tag_elements[-1]
-    arg_index = tag_elements.index('request.user')
-    user = tag_elements[arg_index]
-    return UserTavernRsvpEvents(user, var_name)
+    {% get_user_tavern_rsvp_yes_events for request.user as attending_events %}
+    """
+    try:
+        tag_name, for_contxt, user, as_contxt, var = token.split_contents()
+    except:
+        raise template.TemplateSyntaxError(("Invalid template tag %r"
+                    "Ex: get_user_tavern_rsvp_yes_events for user as"
+                    "attending_events"), token.split_contents()[0])
+    return UserTavernRsvpEvents(user, var)
