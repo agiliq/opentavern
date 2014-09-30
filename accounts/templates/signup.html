@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "tavern/base.html" %}
 {% load socialaccount %}
 
 {% block content %}
@@ -6,34 +6,34 @@
 <div class="nav navbar-nav navbar-left">
 <form action="{% url 'signup' %}" method="POST" class="form-horizontal">
 {% csrf_token %}
-    <fieldset>  
-          <legend>User Registration</legend>  
+    <fieldset>
+          <legend>User Registration</legend>
 
           {% for field in form %}
-           <div class="control-group">  
+           <div class="control-group">
               <label class="control-label" for="input01">{{ field.label_tag }}</label>
-            
-              <div class="controls">  
+
+              <div class="controls">
                 {{ field }}
               </div>
 
               {% if field.errors %}
                {% for error in field.errors %}
-                 <div class="alert alert-info">    
+                 <div class="alert alert-info">
 	         {{ error }}
                  </div>
                {% endfor %}
               {% endif %}
 
-           </div>  
+           </div>
           {% endfor %}
-	
+
  	  <br/>
 
-          <div class="form-actions">  
-            <button type="submit" class="btn btn-primary">Register</button>  
-            <button class="btn btn-danger" type="reset">Cancel</button>  
-          </div>  
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Register</button>
+            <button class="btn btn-danger" type="reset">Cancel</button>
+          </div>
 
     </fieldset>
 
