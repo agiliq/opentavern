@@ -47,5 +47,35 @@
     </fieldset>
 
 </form>
+<script type="text/javascript">
+    $(document).ready(function(){
+        date = new Date()
+        date.setDate(date.getDate() - 1)
+       $("#id_starts_at_picker").data("DateTimePicker").setStartDate(date);
+       $("#id_ends_at_picker").data("DateTimePicker").setStartDate(date);
+        $("#id_starts_at_picker").change(function(){
+            date_in_string = $("#id_starts_at").val();
+            date_in_string = date_in_string.split("-")
+            startyear = parseInt(date_in_string[0])
+            startmonth = parseInt(date_in_string[1])
+            startdate = parseInt(date_in_string[2])
+            date.setFullYear(startyear, startmonth - 1, startdate - 1)
+            $("#id_ends_at_picker").data("DateTimePicker").setStartDate(date);
+        });
 
+        $("#id_ends_at_picker").change(function(){
+            date_in_string = $("#id_ends_at").val();
+            start_date = new Date()
+            start_date.setDate(start_date.getDate() - 1);
+            end_date = new Date()
+            date_in_string = date_in_string.split("-");
+            endyear = parseInt(date_in_string[0]);
+            endmonth = parseInt(date_in_string[1]);
+            enddate = parseInt(date_in_string[2]);
+            end_date.setFullYear(endyear, endmonth - 1, enddate);
+            $("#id_starts_at_picker").data("DateTimePicker").setStartDate(start_date);
+            $("#id_starts_at_picker").data("DateTimePicker").setEndDate(end_date);
+        });
+    });
+</script>
 {% endblock content%}
