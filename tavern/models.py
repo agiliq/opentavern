@@ -149,5 +149,5 @@ def get_groups(user):
 
 def get_rsvp_yes_events(user):
     rsvp_yes_events = user.attendee_set.filter(rsvp_status='yes')
-    events = [event.event for event in rsvp_yes_events]
+    events = [attendee.event for attendee in rsvp_yes_events]
     return events
