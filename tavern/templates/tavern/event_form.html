@@ -49,31 +49,30 @@
 </form>
 <script type="text/javascript">
     $(document).ready(function(){
-        date = new Date()
-        date.setDate(date.getDate() - 1)
-       $("#id_starts_at_picker").data("DateTimePicker").setStartDate(date);
-       $("#id_ends_at_picker").data("DateTimePicker").setStartDate(date);
+        var current_date = new Date()
+        var end_date = new Date()
+        current_date.setDate(current_date.getDate() - 1)
+        $("#id_starts_at_picker").data("DateTimePicker").setStartDate(current_date);
+        $("#id_ends_at_picker").data("DateTimePicker").setStartDate(current_date);
         $("#id_starts_at_picker").change(function(){
-            date_in_string = $("#id_starts_at").val();
-            date_in_string = date_in_string.split("-")
-            startyear = parseInt(date_in_string[0])
-            startmonth = parseInt(date_in_string[1])
-            startdate = parseInt(date_in_string[2])
-            date.setFullYear(startyear, startmonth - 1, startdate - 1)
-            $("#id_ends_at_picker").data("DateTimePicker").setStartDate(date);
+            var start_date = new Date()
+            var starts_at_date = $("#id_starts_at").val();
+            starts_at_date = starts_at_date.split("-")
+            var start_year = parseInt(starts_at_date[0])
+            var start_month = parseInt(starts_at_date[1])
+            var starting_date = parseInt(starts_at_date[2])
+            start_date.setFullYear(start_year, start_month - 1, starting_date - 1)
+            $("#id_ends_at_picker").data("DateTimePicker").setStartDate(start_date);
         });
 
         $("#id_ends_at_picker").change(function(){
-            date_in_string = $("#id_ends_at").val();
-            start_date = new Date()
-            start_date.setDate(start_date.getDate() - 1);
-            end_date = new Date()
-            date_in_string = date_in_string.split("-");
-            endyear = parseInt(date_in_string[0]);
-            endmonth = parseInt(date_in_string[1]);
-            enddate = parseInt(date_in_string[2]);
-            end_date.setFullYear(endyear, endmonth - 1, enddate);
-            $("#id_starts_at_picker").data("DateTimePicker").setStartDate(start_date);
+            var ends_at_date = $("#id_ends_at").val();
+            ends_at_date = ends_at_date.split("-");
+            var end_year = parseInt(ends_at_date[0]);
+            var end_month = parseInt(ends_at_date[1]);
+            var closing_date = parseInt(ends_at_date[2]);
+            end_date.setFullYear(end_year, end_month - 1, closing_date);
+            $("#id_starts_at_picker").data("DateTimePicker").setStartDate(current_date);
             $("#id_starts_at_picker").data("DateTimePicker").setEndDate(end_date);
         });
     });
