@@ -20,7 +20,7 @@ class UserTavernGroups(UserTemplateTagMixin, template.Node):
         user = self.user.resolve(context)
         if not user.__class__.__name__ == "User":
             raise template.TemplateSyntaxError("Invalid arguments passed."
-                        "Argument should be an instance of User")
+                                               "Argument should be an instance of User")
         user_groups = get_groups(user)
         context[self.var_name] = user_groups
         return ''
@@ -45,7 +45,7 @@ class UserTavernRsvpEvents(UserTemplateTagMixin, template.Node):
         user = self.user.resolve(context)
         if not user.__class__.__name__ == 'User':
             raise template.TemplateSyntaxError("Invalid argument type passed."
-                " Argument should be an instance of user")
+                                               " Argument should be an instance of user")
         events = get_rsvp_yes_events(user)
         context[self.var_name] = events
         return ''
@@ -59,7 +59,7 @@ def get_user_tavern_groups(parser, token):
         tag_name, for_contxt, user, as_contxt, var = token.split_contents()
     except ValueError:
         raise template.TemplateSyntaxError(("%r tag is not correct Ex: "
-            "get_user_tavern_groups for user as tavern_groups") % token.split_contents()[0])
+                                            "get_user_tavern_groups for user as tavern_groups") % token.split_contents()[0])
     return UserTavernGroups(user, var)
 
 
@@ -71,7 +71,7 @@ def get_all_tavern_groups(parser, token):
         tag_name, as_contxt, variable = token.split_contents()
     except:
         raise template.TemplateSyntaxError(("Invalid template tag %r."
-            " Ex: get_all_tavern_groups as tavern_groups") % token.split_contents()[0])
+                                            " Ex: get_all_tavern_groups as tavern_groups") % token.split_contents()[0])
     return AllTavernGroups(variable)
 
 
@@ -84,6 +84,6 @@ def get_user_tavern_rsvp_yes_events(parser, token):
         tag_name, for_contxt, user, as_contxt, var = token.split_contents()
     except:
         raise template.TemplateSyntaxError(("Invalid template tag %r"
-                    "Ex: get_user_tavern_rsvp_yes_events for user as"
-                    "attending_events"), token.split_contents()[0])
+                                            "Ex: get_user_tavern_rsvp_yes_events for user as"
+                                            "attending_events"), token.split_contents()[0])
     return UserTavernRsvpEvents(user, var)

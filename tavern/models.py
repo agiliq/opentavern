@@ -152,3 +152,13 @@ def get_rsvp_yes_events(user):
     rsvp_yes_events = user.attendee_set.filter(rsvp_status='yes')
     events = [attendee.event for attendee in rsvp_yes_events]
     return events
+
+
+def get_users_attending_event(event):
+    users_attending_event = event.attendees.filter(attendee__rsvp_status="yes")
+    return users_attending_event
+
+
+def get_users_not_attending_event(event):
+    users_not_attending_event = event.attendees.filter(attendee__rsvp_status="no")
+    return users_not_attending_event
