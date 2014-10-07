@@ -4,25 +4,25 @@ from tavern.models import get_rsvped_no_events
 register = template.Library()
 
 
-class TavernEventNoRsvped(template.Node):
-    def __init__(self, user, var_name):
-        """ Instantiating with the name of the variable
-        to be resolved and calling variable.resolve(context)"""
+class UserTavernRsvpNoEvents(template.Node):
+    def __init__(self, user, local_var):
         self.user = template.Variable(user)
-        self.var_name = var_name
+        self.var = local_var
 
     def render(self, context):
-        user = self.user.resolve(context)
-        Events_for_rsvped_no = get_rsvped_no_events(user)
-        context[self.var_name] = Events_for_rsvped_no
+        try:
+            user = self.user.resolve(context)
+        except:
+            raise template.TemplateSyntaxError("Should be user instance")
+        rsvp_no_events = get_rsvped_no_events(user)
+        context[self.var] = rsvp_no_events
         return ''
-
 
 @register.tag
 def get_user_tavern_rsvped_no_events(parser, token):
     """gets the events for which the rsvped NO"""
-    args = token.split_contents()
-    var_name = args[-1]
-    arg_variable = args.index('request.user')
-    user = args[arg_variable]
-    return TavernEventNoRsvped(user, var_name)
+    try:
+        tag_name, for_keyword, user, as_keyword, var = token.split_contents()
+    except:
+        raise template.TemplateSyntaxError("Invalid argument type")
+    return UserTavernRsvpNoEvents(user, var)

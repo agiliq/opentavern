@@ -148,6 +148,5 @@ def get_groups(user):
 
 
 def get_rsvped_no_events(user):
-    event = Event.objects.all()[0]
-    rsvped = event.creator.attendee_set.filter(rsvp_status="no")
-    return rsvped
+    rsvp_no_events = user.event_set.filter(attendee__rsvp_status='no')
+    return rsvp_no_events
