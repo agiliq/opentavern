@@ -152,3 +152,10 @@ def get_rsvp_yes_events(user):
     rsvp_yes_events = user.attendee_set.filter(rsvp_status='yes')
     events = [attendee.event for attendee in rsvp_yes_events]
     return events
+
+
+def get_upcoming_events(user):
+    joined_groups = user.tavern_groups.all()
+    events = Event.objects.all()
+    upcoming_events_for_user_joined = events.filter(group=joined_groups)
+    return upcoming_events_for_user_joined
