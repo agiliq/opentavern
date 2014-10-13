@@ -9,7 +9,8 @@
 
     {% if event.starts_at %}
         <h3> Event starts on </h3>
-        {{ event.starts_at }}
+        {{ event.starts_at }} at 
+        <a href="https://www.google.co.in/maps/place/{{ event.location }}" target="_blank"> {{ event.location }} </a>
         <hr/>
     {% endif %}
 
