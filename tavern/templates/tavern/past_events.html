@@ -3,6 +3,8 @@
     <ul>
     {% for event in past_events %}
         <li><a href="{% url 'tavern_event_details' event.slug %}">{{ event.name }}</a></li>
+        {% empty %}
+        No Completed Events
     {% endfor %}
     </ul>
 </div>
