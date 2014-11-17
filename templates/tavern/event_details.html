@@ -11,6 +11,7 @@
         <tr>
             <th>Created by</th>
             <th>Organized in</th>
+            <th>Place</th>
             <th>Timings</th>
         </tr>
     </thead>
@@ -18,6 +19,7 @@
         <tr>
             <td>{{ event.get_creator }}</td>
             <td><a href="{{ event.group.get_absolute_url }}">{{ event.group }} Group</a></td>
+            <td>{{ event.location }}</td>
             <td>{{ event.starts_at }} - {{ event.ends_at }}</td>
         </tr>
     </tbody>
