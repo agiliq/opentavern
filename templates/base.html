@@ -24,7 +24,7 @@
                 <div class="nav navbar-nav navbar-right">
 
                 {% if user.is_authenticated %}
-                  <li><a href="#"> Welcome: {% firstof user.first_name user.username %}</a></li>
+                  <li><a href="{% url 'index' %}"> Welcome: {% firstof user.first_name user.username %}</a></li>
                   <li><a href="{% url 'tavern_create_group' %}"> Create Group </a></li>
                   <li><a href="/accounts/logout?next=/" title="logout"> Logout</a></li>
                   <li><a href="{% url 'change_password' %}" title="ChangePassword"> Change Password</a></li>
