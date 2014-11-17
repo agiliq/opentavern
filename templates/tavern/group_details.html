@@ -2,9 +2,10 @@
 {% load guardian_tags %}
 
 {% block content %}
-    <h1> Group Name: {{ group.name }} </h1>
+<div class="col-md-8">
+    <h1>{{ group.name|capfirst }} </h1>
     {% if user.is_authenticated %}
-      <button id="is_member" type="button" onclick="toggle_member('{{ user.id }}', '{{ group.slug }}')">
+      <button class="btn btn-warning btn-xs" id="is_member" type="button" onclick="toggle_member('{{ user.id }}', '{{ group.slug }}')">
           {% if user_is_member %}
               Unjoin group
           {% else %}
@@ -12,14 +13,39 @@
           {% endif %}
       </button>
     {% endif %}
-    <h1> Recently Joined: {{ user.name }} </h1>
-    <ul>
-    {% for member in recent_group_members %}
-        <li>{{ member.user }}</li>
-    {% endfor %}
-    </ul>
+
+    <p class="tavern-box">{{ group.description }}</p>
+
+    <div class="tavern-box">
+        <h3> Recently Joined {{ group.members_name }}: </h3>
+        <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Joined on</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for member in recent_group_members %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ member.get_name }}</td>
+                <td>{{ member.join_date }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td>No one here</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+    </div>
+
+    <div class="tavern-box">
         {% get_obj_perms request.user for group as "group_perms" %}
         {% if "change_taverngroup" in group_perms %}
+        <h3>Manage this Group</h3>
         <a class="btn btn-default" href="{% url 'tavern_group_update' group.slug %}">Edit Group</a>
         {% endif %}
 
@@ -45,10 +71,14 @@
         </div>
         <button class="btn btn-danger" data-toggle="modal" data-target="#deleteGroupModal">Delete</button>
         {% endif %}
+    </div>
+
+</div>
+<div class="col-md-4">
     {% include 'tavern/past_events.html' %}
 
     {% include 'tavern/upcoming_events.html' %}
-
+</div>
 {% endblock content %}
 
 {% block javascript %}

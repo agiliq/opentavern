@@ -1,8 +1,10 @@
-<div class="recently_complted" style="padding-top: 60px;">
-    <h1> Recently completed Events</h1>
-    <ul>
+<div class="completed-events">
+    <h3>Recently completed Events</h3>
+    <ul class="list-group">
     {% for event in past_events %}
-        <li><a href="{{ event.get_absolute_url }}">{{ event.name }}</a></li>
+        <li class="list-group-item"><a href="{{ event.get_absolute_url }}">{{ event.name|capfirst }}</a></li>
+        {% empty %}
+        <li class="list-group-item">No upcoming events</li>
     {% endfor %}
     </ul>
 </div>

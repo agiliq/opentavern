@@ -63,6 +63,9 @@ class Membership(models.Model):
     class Meta:
         unique_together = ['user', 'tavern_group']
 
+    def get_name(self):
+        return self.user.get_full_name() or self.user.username
+
     def __unicode__(self):
         return "%s - %s" % (self.user.username, self.tavern_group.name)
 
@@ -101,6 +104,9 @@ class Event(models.Model):
 
     class Meta:
         ordering = ['starts_at']
+
+    def get_creator(self):
+        return self.creator.get_full_name() or self.creator.username
 
     def get_absolute_url(self):
         return reverse("tavern_event_details", kwargs={"slug": self.slug,
