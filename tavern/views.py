@@ -138,7 +138,7 @@ class EventDetail(UpcomingEventsMixin, DetailView):
         group = TavernGroup.objects.get(slug=group_name)
         event = group.event_set.get(slug=event_name)
         try:
-            attendee = Attendee.objects.get(user=self.request.user,
+            attendee = Attendee.objects.get(user_id=self.request.user.id,
                                             event=event)
             if attendee.rsvp_status == 'yes':
                 message = "You are attending this event."

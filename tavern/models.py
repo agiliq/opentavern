@@ -133,6 +133,10 @@ class Attendee(models.Model):
                                    max_length=5,
                                    default="yes")
 
+    @property
+    def get_name(self):
+        return self.user.get_full_name() or self.user.username
+
     def __unicode__(self):
         return "%s - %s - %s" % (self.user.first_name, self.event.name,
                                  self.rsvp_status)
