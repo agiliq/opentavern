@@ -133,9 +133,20 @@ class Attendee(models.Model):
                                    max_length=5,
                                    default="yes")
 
-    @property
     def get_name(self):
         return self.user.get_full_name() or self.user.username
+
+    def get_rsvp(self):
+        if self.rsvp_status == "yes" and timezone.now() <= self.event.ends_at:
+            return "You are attending this event."
+        elif self.rsvp_status == "yes" and timezone.now() > self.event.ends_at:
+            return "You have attended this event."
+        elif self.rsvp_status == "no" and timezone.now() <= self.event.ends_at:
+            return "You are not attending this event."
+        elif self.rsvp_status == "maybe" and timezone.now() <= self.event.ends_at:
+            return "You may attend this event."
+        else:
+            return "You did not attend this event."
 
     def __unicode__(self):
         return "%s - %s - %s" % (self.user.first_name, self.event.name,
