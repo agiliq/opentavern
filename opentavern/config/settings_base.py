@@ -104,7 +104,11 @@ STATIC_ROOT = SITE_PATH + '/static_files/'
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
-    SITE_PATH.child('opentavern', 'static'),
+    SITE_PATH.child('static'),
+)
+
+TEMPLATE_DIRS = (
+    SITE_PATH.child('templates'),
 )
 
 LOGIN_REDIRECT_URL = '/'

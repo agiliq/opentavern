@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h3>Add organizers</h3>
+<form action="{% url 'edit_organizers' object.slug %}" method="post">
+    {% csrf_token %}
+    {{ forms.add.as_p }}
+    <button name="action" value="add" class="btn btn-default" type="submit">Add</button>
+</form>
+<hr />
+<h3>Remove organizers</h3>
+<form action="{% url 'edit_organizers' object.slug %}" method="post">
+    {% csrf_token %}
+    {{ forms.remove.as_p }}
+    <button name="action" value="remove" class="btn btn-danger" type="submit">Remove</button>
+</form>
+{% endblock content %}

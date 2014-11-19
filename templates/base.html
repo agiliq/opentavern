@@ -1,0 +1,52 @@
+{% load socialaccount %}
+<html>
+  <head>
+    <title>{% block title%}Open Tavern{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css">
+    <script type="text/javascript" src="{{ STATIC_URL }}jquery/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/base.css">
+
+    {% block javascript %}
+    {% endblock %}
+
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="navbar navbar-inverse navbar-fixed-top">
+          <div class="navbar-inner">
+            <div class="container">
+                <div class="navbar-header">
+                  <a class="navbar-brand" href="/">Open Tavern</a>
+                </div>
+                <div class="nav navbar-nav navbar-right">
+
+                {% if user.is_authenticated %}
+                  <li><a href="{% url 'index' %}"> Welcome: {% firstof user.first_name user.username %}</a></li>
+                  <li><a href="{% url 'tavern_create_group' %}"> Create Group </a></li>
+                  <li><a href="{% url 'tavern_create_event' %}"> Add Event </a></li>
+                  <li><a href="{% url 'change_password' %}" title="ChangePassword"> Change Password</a></li>
+                  <li><a href="/accounts/logout?next=/" title="logout"> Logout</a></li>
+                {% else %}
+
+                  <li><a href="{% url 'signup' %}" title="SignUp"> SignUp</a></li>
+                  <form class="navbar-form navbar-right" action="{% url 'signin' %}" method="POST" >
+                      {% csrf_token %}
+                      <input type="text" name="username" id="id_username" placeholder="Username">
+                      <input type="password" name="password" id="id_password" placeholder="Password">
+                      <button type="submit" class="btn btn-success">Sign in</button>
+                  </form>
+                {% endif %}
+
+                </div>
+            </div>
+          </div>
+        </div>
+    </div> <!-- HEADER -->
+
+    <div id="content">{% block content %}{% endblock %}</div> <!-- CONTENT -->
+    </div>
+  </body>
+</html>

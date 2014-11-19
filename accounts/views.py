@@ -9,7 +9,7 @@ from tavern.forms import UserCreateForm
 
 
 @login_required
-def change_password(request, template='change_password.html'):
+def change_password(request, template='accounts/change_password.html'):
     form = PasswordChangeForm(user=request.user)
     if request.method == 'POST':
         form = PasswordChangeForm(request.user, request.POST)
@@ -22,7 +22,7 @@ def change_password(request, template='change_password.html'):
     return render(request, template, context)
 
 
-def signup(request, template='signup.html'):
+def signup(request, template='accounts/signup.html'):
     form = UserCreateForm()
     if request.method == 'POST':
         form = UserCreateForm(request.POST)
@@ -54,8 +54,3 @@ def signin(request):
         else:
             messages.error(request, 'Invalid login credentials')
             return redirect('index')
-
-
-
-
-

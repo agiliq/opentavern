@@ -1,0 +1,19 @@
+#content {
+	padding-top: 100px;
+}
+
+.list-group{
+	width: 300px;
+}
+
+#home-description {
+	padding: 30px 15px;
+}
+
+.tavern-box {
+	margin: 24px 0px;
+}
+
+.upcoming-events, .completed-events {
+	margin-top: 30px;
+}

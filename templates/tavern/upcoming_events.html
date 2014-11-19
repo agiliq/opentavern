@@ -1,0 +1,10 @@
+<div class="upcoming-events">
+    <h3> Upcoming Events</h3>
+    <ul class="list-group">
+    {% for event in upcoming_events %}
+        <li class="list-group-item"><a href="{{ event.get_absolute_url }}">{{ event.name|capfirst }}</a></li>
+        {% empty %}
+        <li class="list-group-item">No upcoming events</li>
+    {% endfor %}
+    </ul>
+</div>
