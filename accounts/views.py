@@ -1,4 +1,5 @@
 """ Opentavern Views"""
+from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
@@ -28,7 +29,7 @@ def signup(request, template='accounts/signup.html'):
         form = UserCreateForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.is_active = False
+            user.is_active = settings.DEFAULT_USER_STATUS
             user.save()
             messages.success(request, 'You are successfully registered')
             context = {'form': form}
