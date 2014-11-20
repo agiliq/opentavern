@@ -1,5 +1,5 @@
 #content {
-	padding-top: 100px;
+	padding-top: 5px;
 }
 
 .list-group{
@@ -16,4 +16,8 @@
 
 .upcoming-events, .completed-events {
 	margin-top: 30px;
+}
+
+@-moz-document url-prefix() {
+  fieldset { display: table-cell; }
 }

@@ -18,28 +18,30 @@
 
     <div class="tavern-box">
         <h3> Recently Joined {{ group.members_name }}: </h3>
-        <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Joined on</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for member in recent_group_members %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ member.get_name }}</td>
-                <td>{{ member.join_date }}</td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td>No one here</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Joined on</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for member in recent_group_members %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ member.get_name }}</td>
+                    <td>{{ member.join_date }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td>No one here</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            </table>
+        </div>
     </div>
 
     <div class="tavern-box">
