@@ -1,0 +1,21 @@
+{
+  "name": "Opentavern",
+  "description": "OpenTavern is a self hosted local meetup groups organizer.",
+  "keywords": [
+    "meetup",
+    "organizer",
+    "events"
+  ],
+  "website": "http://opentavern.herokuapp.com/",
+  "repository": "https://github.com/akarambir/opentavern",
+  "success_url": "/",
+  "scripts": {
+    "postdeploy": "python manage.py syncdb --migrate --noinput"
+  },
+  "env": {
+    "DJANGO_SETTINGS_MODULE": "opentavern.config.settings_heroku"
+  },
+  "addons": [
+    "heroku-postgresql:hobby-dev"
+  ]
+}
