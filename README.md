@@ -27,3 +27,9 @@ Todo
 Demo
 ------
 [http://opentavern.herokuapp.com/](http://opentavern.herokuapp.com/)
+
+Deploy to Heroku
+-----------------
+You can deploy this app straight to heroku with this button. Only free postgres addon is used, so no charges will incur.
+
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)

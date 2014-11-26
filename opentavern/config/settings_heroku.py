@@ -10,3 +10,7 @@ DATABASES['default'] = dj_database_url.config()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 ALLOWED_HOSTS = ['*']
+
+# For heroku the user will be set to active after registration.
+# This is done as there is no verification email being sent for now.
+DEFAULT_USER_STATUS = True
