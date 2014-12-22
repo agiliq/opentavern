@@ -10,6 +10,10 @@ from .models import TavernGroup, Event, Membership
 
 class CreateGroupForm(forms.ModelForm):
     """ CreateGroupForm """
+
+    def __len__(self):
+        return len(self.fields)
+
     class Meta:
         model = TavernGroup
         exclude = ['creator', 'organizers', 'members', 'slug']
@@ -28,6 +32,9 @@ class CreateEventForm(forms.ModelForm):
         self.fields['group'].queryset = self.user.tavern_groups.all()
         self.fields['starts_at'].widget = DateTimePicker(options={"format": "YYYY-MM-DD HH:mm", })
         self.fields['ends_at'].widget = DateTimePicker(options={"format": "YYYY-MM-DD HH:mm", })
+
+    def __len__(self):
+        return len(self.fields)
 
     def clean(self):
         cleaned_data = super(CreateEventForm, self).clean()
@@ -51,6 +58,9 @@ class UpdateEventForm(forms.ModelForm):
         self.fields['starts_at'].widget = DateTimePicker(options={"format": "YYYY-MM-DD HH:mm", })
         self.fields['ends_at'].widget = DateTimePicker(options={"format": "YYYY-MM-DD HH:mm", })
 
+    def __len__(self):
+        return len(self.fields)
+
 
 class UserCreateForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -58,6 +68,9 @@ class UserCreateForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('username', 'email', 'password1', 'password2')
+
+    def __len__(self):
+        return len(self.fields)
 
     def save(self, commit=True):
         user = super(UserCreateForm, self).save(commit=False)
@@ -69,6 +82,9 @@ class UserCreateForm(UserCreationForm):
 
 class AddOrganizerForm(forms.Form):
     usernames = forms.CharField()
+
+    def __len__(self):
+        return len(self.fields)
 
     def clean(self):
         cleaned_data = super(AddOrganizerForm, self).clean()
