@@ -9,22 +9,6 @@ from datetime import datetime, timedelta
 
 class TestModels(TestCase):
 
-    def test_tavern_group_permissions(self):
-        """Test that creator of the group has change and delete
-        permissions for that group and oganizer should have only
-        change permission"""
-        creator = create_and_get_user()
-        tavern_group = create_and_get_tavern_group(creator=creator)
-        self.assertEqual(creator.has_perm('change_taverngroup', tavern_group), True)
-        self.assertEqual(creator.has_perm('delete_taverngroup', tavern_group), True)
-
-        user = User.objects.create_user(username='test2',
-                                        email='test2@agiliq.com',
-                                        password='test2')
-        tavern_group.organizers.add(user)
-        self.assertEqual(user.has_perm('change_taverngroup', tavern_group), True)
-        self.assertEqual(user.has_perm('delete_taverngroup', tavern_group), False)
-
     def test_tavern_group_save(self):
         """When a TavernGroup is saved, we want to make sure
         an instance of Membership which associates the creator
@@ -58,22 +42,6 @@ class TestModels(TestCase):
                                            rsvp_status="yes")
         self.assertEqual(Attendee.objects.count(), 2)
         self.assertEqual(attendee.__unicode__(), u' - Tavern Event - yes')
-
-    def test_event_permisssions(self):
-        """Test that creator of an event have change and delete
-        permissions. Creator of the group in which that event is should also
-        have these permission"""
-
-        group_creator = create_and_get_user()
-        tavern_group = create_and_get_tavern_group(creator=group_creator)
-        event_creator = User.objects.create_user(username='test2',
-                                                 email='test2@agiliq.com',
-                                                 password='test2')
-        event = create_and_get_event(user=event_creator, tgroup=tavern_group)
-        self.assertEqual(group_creator.has_perm('change_event', event), True)
-        self.assertEqual(group_creator.has_perm('delete_event', event), True)
-        self.assertEqual(event_creator.has_perm('change_event', event), True)
-        self.assertEqual(event_creator.has_perm('delete_event', event), True)
 
     def test_event_manager(self):
         """Test the new objects manager that it returns only

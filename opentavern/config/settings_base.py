@@ -148,3 +148,7 @@ SOCIALACCOUNT_PROVIDERS = {
         'METHOD': 'oauth2',
     }
 }
+
+# For heroku the user will be set to active after registration.
+# This is done as there is no verification email being sent for now.
+DEFAULT_USER_STATUS = False
