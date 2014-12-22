@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load guardian_tags %}
 
 {% block content %}
 <h1>{{ event.name|capfirst }} </h1>
@@ -90,13 +89,9 @@
 
 {% if editable %}
 <div class="row tavern-box">
-    {% get_obj_perms request.user for event as "event_perms" %}
-    {% if "change_event" in event_perms %}
     <h3>Manage</h3>
     <a class="btn btn-default" href="{% url 'tavern_event_update' event.slug %}">Edit Event</a>
-    {% endif %}
 
-    {% if "delete_event" in event_perms %}
     <div id="deleteEventModal" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -116,7 +111,6 @@
         </div>
     </div>
     <button class="btn btn-danger" data-toggle="modal" data-target="#deleteEventModal">Delete</button>
-    {% endif %}
 </div>
 {% endif %}
 

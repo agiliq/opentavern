@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load guardian_tags %}
 
 {% block content %}
 <div class="col-md-8">
@@ -45,13 +44,9 @@
     </div>
 
     <div class="tavern-box">
-        {% get_obj_perms request.user for group as "group_perms" %}
-        {% if "change_taverngroup" in group_perms %}
         <h3>Manage this Group</h3>
         <a class="btn btn-default" href="{% url 'tavern_group_update' group.slug %}">Edit Group</a>
-        {% endif %}
 
-        {% if "delete_taverngroup" in group_perms %}
         <a class="btn btn-default" href="{% url 'edit_organizers' group.slug %}">Add/Remove Organizers</a>
         <div id="deleteGroupModal" class="modal fade" tabindex="-1" role="dialog">
             <div class="modal-dialog">
@@ -72,7 +67,6 @@
             </div>
         </div>
         <button class="btn btn-danger" data-toggle="modal" data-target="#deleteGroupModal">Delete</button>
-        {% endif %}
     </div>
 
 </div>

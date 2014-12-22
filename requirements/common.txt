@@ -1,6 +1,5 @@
-Django==1.6.5
+Django>=1.6,<1.7
 Unipath==1.0
 South==0.8.4
 django-allauth==0.16.1
-django-guardian==1.2.0
 django-bootstrap3-datetimepicker==2.2.3

@@ -11,8 +11,6 @@ from django.views.generic import DetailView
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.views.generic.detail import SingleObjectMixin
 
-from guardian.mixins import LoginRequiredMixin, PermissionRequiredMixin
-
 from .models import TavernGroup, Membership, Event, Attendee
 from .forms import CreateGroupForm, CreateEventForm, UpdateEventForm, AddOrganizerForm, RemoveOrganizerForm
 from .multiform import MultiFormsView
@@ -83,6 +81,13 @@ def tavern_toggle_member(request):
             join_date=today_date())
         response = "Unjoin Group"
     return HttpResponse(response)
+
+
+class LoginRequiredMixin(object):
+    @classmethod
+    def as_view(cls, **initkwargs):
+        view = super(LoginRequiredMixin, cls).as_view(**initkwargs)
+        return login_required(view)
 
 
 class UpcomingEventsMixin(object):
@@ -170,35 +175,26 @@ class GroupCreate(LoginRequiredMixin, CreateView):
         return super(GroupCreate, self).form_valid(form)
 
 
-class GroupUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class GroupUpdate(LoginRequiredMixin, UpdateView):
     """ Updates a group """
     model = TavernGroup
     form_class = CreateGroupForm
     template_name = 'tavern/group_form.html'
-    permission_required = 'tavern.change_taverngroup'
-    render_403 = True
-    return_403 = True
 
 
-class GroupDelete(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+class GroupDelete(LoginRequiredMixin, DeleteView):
     model = TavernGroup
-    permission_required = 'tavern.delete_taverngroup'
-    render_403 = True
-    return_403 = True
 
     def get_success_url(self, **kwargs):
         return reverse("index")
 
 
-class EditOrganizers(LoginRequiredMixin, PermissionRequiredMixin, SingleObjectMixin, MultiFormsView):
+class EditOrganizers(LoginRequiredMixin, SingleObjectMixin, MultiFormsView):
     template_name = "tavern/edit_organizers.html"
     form_classes = {'add': AddOrganizerForm,
                     'remove': RemoveOrganizerForm
                     }
     model = TavernGroup
-    permission_required = 'tavern.delete_taverngroup'
-    render_403 = True
-    return_403 = True
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -241,21 +237,15 @@ class EventCreate(LoginRequiredMixin, CreateView):
         return super(EventCreate, self).form_valid(form)
 
 
-class EventUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class EventUpdate(LoginRequiredMixin, UpdateView):
     """ Update an Event """
     model = Event
     form_class = UpdateEventForm
     template_name = 'tavern/event_form.html'
-    permission_required = 'tavern.change_event'
-    render_403 = True
-    return_403 = True
 
 
-class EventDelete(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+class EventDelete(LoginRequiredMixin, DeleteView):
     model = Event
-    permission_required = 'tavern.delete_event'
-    render_403 = True
-    return_403 = True
 
     def get_success_url(self, **kwargs):
         return reverse("tavern_group_details", kwargs={"slug": self.object.group.slug})
