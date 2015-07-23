@@ -1,8 +1,0 @@
-<div class="recently_complted" style="padding-top: 60px;">
-    <h1> Recently completed Events</h1>
-    <ul>
-    {% for event in past_events %}
-        <li><a href="{% url 'tavern_event_details' event.slug %}">{{ event.name }}</a></li>
-    {% endfor %}
-    </ul>
-</div>

@@ -1,4 +1,5 @@
 """ Opentavern Views"""
+from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
@@ -9,7 +10,7 @@ from tavern.forms import UserCreateForm
 
 
 @login_required
-def change_password(request, template='change_password.html'):
+def change_password(request, template='accounts/change_password.html'):
     form = PasswordChangeForm(user=request.user)
     if request.method == 'POST':
         form = PasswordChangeForm(request.user, request.POST)
@@ -22,13 +23,13 @@ def change_password(request, template='change_password.html'):
     return render(request, template, context)
 
 
-def signup(request, template='signup.html'):
+def signup(request, template='accounts/signup.html'):
     form = UserCreateForm()
     if request.method == 'POST':
         form = UserCreateForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.is_active = False
+            user.is_active = settings.DEFAULT_USER_STATUS
             user.save()
             messages.success(request, 'You are successfully registered')
             context = {'form': form}
@@ -54,8 +55,3 @@ def signin(request):
         else:
             messages.error(request, 'Invalid login credentials')
             return redirect('index')
-
-
-
-
-

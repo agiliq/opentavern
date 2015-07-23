@@ -59,13 +59,7 @@ def rsvp(request, event_id, rsvp_status):
                                            rsvp_status=rsvp_status,
                                            rsvped_on=timezone.now())
 
-    if rsvp_status == 'yes':
-        message = "You are attending this event."
-    elif rsvp_status == 'no':
-        message = "You are not attending this event."
-    elif rsvp_status == 'maybe':
-        message = "You may attend this event."
-
+    message = attendee.get_rsvp()
     return HttpResponse(message)
 
 
@@ -138,17 +132,15 @@ class EventDetail(UpcomingEventsMixin, DetailView):
         group = TavernGroup.objects.get(slug=group_name)
         event = group.event_set.get(slug=event_name)
         try:
-            attendee = Attendee.objects.get(user=self.request.user,
+            attendee = Attendee.objects.get(user_id=self.request.user.id,
                                             event=event)
-            if attendee.rsvp_status == 'yes':
-                message = "You are attending this event."
-            elif attendee.rsvp_status == 'no':
-                message = "You are not attending this event."
-            elif attendee.rsvp_status == 'maybe':
-                message = "You may attend this event."
+            message = attendee.get_rsvp()
             context['attendee'] = attendee
         except Attendee.DoesNotExist:
-            message = "You have not rsvped yet"
+            if timezone.now() <= event.ends_at:
+                message = "You have not rsvped"
+            else:
+                message = "You did not rsvp"
         context['attendee_rsvp'] = message
 
         context['event_attendees'] = Attendee.objects.filter(event=event,
@@ -164,6 +156,7 @@ class EventDetail(UpcomingEventsMixin, DetailView):
             event = group.event_set.get(slug=event_name)
         except Event.DoesNotExist:
             raise Http404
+        return event
 
 
 class GroupCreate(LoginRequiredMixin, CreateView):

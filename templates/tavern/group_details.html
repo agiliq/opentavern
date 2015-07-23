@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load guardian_tags %}
+
+{% block content %}
+<div class="col-md-8">
+    <h1>{{ group.name|capfirst }} </h1>
+    {% if user.is_authenticated %}
+      <button class="btn btn-warning btn-xs" id="is_member" type="button" onclick="toggle_member('{{ user.id }}', '{{ group.slug }}')">
+          {% if user_is_member %}
+              Unjoin group
+          {% else %}
+              Join group
+          {% endif %}
+      </button>
+    {% endif %}
+
+    <p class="tavern-box">{{ group.description }}</p>
+
+    <div class="tavern-box">
+        <h3> Recently Joined {{ group.members_name }}: </h3>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Joined on</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for member in recent_group_members %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ member.get_name }}</td>
+                    <td>{{ member.join_date }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td>No one here</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="tavern-box">
+        {% get_obj_perms request.user for group as "group_perms" %}
+        {% if "change_taverngroup" in group_perms %}
+        <h3>Manage this Group</h3>
+        <a class="btn btn-default" href="{% url 'tavern_group_update' group.slug %}">Edit Group</a>
+        {% endif %}
+
+        {% if "delete_taverngroup" in group_perms %}
+        <a class="btn btn-default" href="{% url 'edit_organizers' group.slug %}">Add/Remove Organizers</a>
+        <div id="deleteGroupModal" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Are you sure?</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{% url 'delete_group' group.slug %}" method="POST">
+                            {% csrf_token %}
+                            <button class="btn btn-default" type="submit">Yes</button>
+                            <button class="btn btn-default" type="button" class="close" data-dismiss="modal">No</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer"></div>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-danger" data-toggle="modal" data-target="#deleteGroupModal">Delete</button>
+        {% endif %}
+    </div>
+
+</div>
+<div class="col-md-4">
+    {% include 'tavern/past_events.html' %}
+
+    {% include 'tavern/upcoming_events.html' %}
+</div>
+{% endblock content %}
+
+{% block javascript %}
+    <script>
+        function toggle_member(user, slug) {
+            var url = "{% url 'tavern_toggle_member' %}";
+            $.post(url,
+                   {user_id:user, slug:slug,
+                   csrfmiddlewaretoken: '{{ csrf_token }}'},
+                   function(data) {
+                    $("#is_member").html(data);
+                   });
+        }
+    </script>
+{% endblock %}

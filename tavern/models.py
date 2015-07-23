@@ -63,6 +63,9 @@ class Membership(models.Model):
     class Meta:
         unique_together = ['user', 'tavern_group']
 
+    def get_name(self):
+        return self.user.get_full_name() or self.user.username
+
     def __unicode__(self):
         return "%s - %s" % (self.user.username, self.tavern_group.name)
 
@@ -102,6 +105,9 @@ class Event(models.Model):
     class Meta:
         ordering = ['starts_at']
 
+    def get_creator(self):
+        return self.creator.get_full_name() or self.creator.username
+
     def get_absolute_url(self):
         return reverse("tavern_event_details", kwargs={"slug": self.slug,
                                                        "group": self.group.slug})
@@ -133,6 +139,21 @@ class Attendee(models.Model):
                                    max_length=5,
                                    default="yes")
 
+    def get_name(self):
+        return self.user.get_full_name() or self.user.username
+
+    def get_rsvp(self):
+        if self.rsvp_status == "yes" and timezone.now() <= self.event.ends_at:
+            return "You are attending this event."
+        elif self.rsvp_status == "yes" and timezone.now() > self.event.ends_at:
+            return "You have attended this event."
+        elif self.rsvp_status == "no" and timezone.now() <= self.event.ends_at:
+            return "You are not attending this event."
+        elif self.rsvp_status == "maybe" and timezone.now() <= self.event.ends_at:
+            return "You may attend this event."
+        else:
+            return "You did not attend this event."
+
     def __unicode__(self):
         return "%s - %s - %s" % (self.user.first_name, self.event.name,
                                  self.rsvp_status)
@@ -146,3 +167,9 @@ def get_unjoined_groups(user):
 def get_groups(user):
     user_groups = TavernGroup.objects.filter(members=user)
     return user_groups
+
+
+def get_rsvp_yes_events(user):
+    rsvp_yes_events = user.attendee_set.filter(rsvp_status='yes')
+    events = [attendee.event for attendee in rsvp_yes_events]
+    return events

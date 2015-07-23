@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load socialaccount %}
+
+{% block content %}
+<div class="col-md-6 col-md-offset-4 col-lg-6 col-lg-offset-4">
+<h1>Registration</h1>
+
+{% if success %}
+    <div class="alert alert-success">
+       You had a successful registration
+    </div>
+{% endif %}
+
+<form action="{% url 'signup' %}" method="POST" class="form-horizontal">
+{% csrf_token %}
+    <fieldset>
+          {% for field in form %}
+           <div class="control-group">
+              <label class="control-label" for="input01">{{ field.label_tag }}</label>
+
+              <div class="controls">
+                {{ field }}
+              </div>
+
+              {% if field.errors %}
+               {% for error in field.errors %}
+                 <div class="alert alert-info">
+	         {{ error }}
+                 </div>
+               {% endfor %}
+              {% endif %}
+
+           </div>
+          {% endfor %}
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Register</button>
+            <a class="btn btn-default" href="{% url 'index' %}">Cancel</a>
+          </div>
+    </fieldset>
+</form>
+
+  <h3>or SignUp with</h3>
+  <a href="{% provider_login_url 'twitter' method='oauth2' %}"><button type="button" class="btn btn-info">Twitter</button></a>
+  <a href="{% provider_login_url 'facebook' method='oauth2' %}"><button type="button" class="btn btn-primary">Facebook</button></a>
+  <a href="{% provider_login_url 'openid' openid="https://www.google.com/accounts/o8/id" next="/" %}"><button type="button" class="btn btn-danger">Google</button></a>
+</div>
+
+{% endblock content %}
